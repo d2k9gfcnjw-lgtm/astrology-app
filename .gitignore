@@ -1,0 +1,25 @@
+# Large downloaded data (fetched by scripts/fetch_data.py)
+data/
+
+# Private chart database and backups
+*.sqlite
+*.sqlite3
+*.db
+backups/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+.env
+
+# Golden test charts contain real birth data: keep them local only
+golden/*
+!golden/README.md

@@ -1,0 +1,80 @@
+# Aimed solar return scoring rules (Ciro Discepolo method), starter version.
+# status: core    = widely documented Discepolo rule
+# status: confirm = starting assumption; check against his books before trusting
+# Weights are starting points. Tune them as you study and track outcomes.
+
+house_system: placidus
+cusp_orb_degrees: 2.5        # planet this close before a cusp counts in the next house (confirm)
+star_rating:
+  # raw score thresholds for 1 to 5 stars (tune after testing)
+  thresholds: [-60, -20, 10, 40, 70]
+
+hard_filters:
+  - id: sr_asc_in_natal_1_6_12
+    description: SR Ascendant falls in natal 1st, 6th or 12th house
+    houses: [1, 6, 12]
+    status: core
+
+penalties:
+  - id: malefics_in_sr_1_6_12
+    description: Sun, Moon, Mars, Saturn, Uranus, Neptune, Pluto in SR houses 1, 6 or 12
+    bodies: [sun, moon, mars, saturn, uranus, neptune, pluto]
+    houses: {12: -60, 1: -45, 6: -40}
+    status: core (confirm planet list and weights)
+  - id: stellium_in_sr_1_6_12
+    description: Three or more bodies in SR house 1, 6 or 12
+    min_bodies: 3
+    houses: [1, 6, 12]
+    weight: -60
+    status: core
+  - id: malefics_in_sr_7_8
+    description: Mars, Saturn or outer planets in SR 7th or 8th
+    bodies: [mars, saturn, uranus, neptune, pluto]
+    houses: [7, 8]
+    weight: -20
+    status: confirm
+
+bonuses:
+  - id: sr_asc_in_natal_10
+    description: SR Ascendant in natal 10th house
+    weight: 30
+    goals: [career]
+    status: core
+  - id: benefics_angular
+    description: Jupiter or Venus within orb of an SR angle, strongest at MC
+    bodies: [jupiter, venus]
+    angle_orb_degrees: 8
+    weights: {mc: 30, asc: 25, dsc: 20, ic: 20}
+    status: core
+  - id: sun_in_sr_10_11
+    description: Sun in SR 10th or 11th house
+    houses: [10, 11]
+    weight: 25
+    status: confirm
+  - id: cusp_frees_intercepted_sign
+    description: An SR Placidus cusp falls in a sign intercepted in the natal chart
+    weight: 5
+    status: core (from his intercepted sign teaching)
+
+overrides:
+  - id: saturn_dominates_mc
+    description: Saturn near the SR MC cancels any benefic bonus at the MC
+    saturn_mc_orb_degrees: 8
+    status: core (Solar Returns book)
+
+goal_profiles:
+  # multipliers applied to bonus weights per goal for the year
+  career:      {sr_asc_in_natal_10: 1.0, benefics_angular: 1.2, sun_in_sr_10_11: 1.2}
+  love:        {benefics_angular: 1.2}
+  rest:        {sr_asc_in_natal_10: 0.0}
+  money:       {benefics_angular: 1.1}
+  inner_work:  {sr_asc_in_natal_10: 0.0}
+
+finder_defaults:
+  population_floor: 100000
+  max_airport_distance_km: 100
+  airport_types: [large_airport]
+  require_scheduled_service: true
+  grid_step_degrees: 1.0
+  refine_step_degrees: 0.25
+  latitude_range: [-60, 66]

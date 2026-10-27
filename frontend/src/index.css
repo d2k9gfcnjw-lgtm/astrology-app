@@ -108,7 +108,8 @@ fieldset label input[type="number"] { width: 70px; }
   .app { display: flex; flex-direction: column; height: auto; min-height: 100vh; }
   header { gap: 8px; padding: 6px 8px; }
   header h1 { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  .header-actions button { padding: 5px 8px; font-size: 13px; }
+  .header-actions button { padding: 5px 8px; font-size: 13px; white-space: nowrap; }
+  .header-actions { overflow-x: auto; flex-shrink: 1; min-width: 0; }
   .app.sidebar-closed .sidebar { display: none; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--line); max-height: 60vh; }
   main { overflow: visible; }

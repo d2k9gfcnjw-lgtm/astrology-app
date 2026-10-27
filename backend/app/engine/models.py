@@ -18,6 +18,35 @@ FortuneFormula = Literal["sect", "day"]
 Ayanamsa = Literal["lahiri", "fagan_bradley", "raman", "krishnamurti"]
 
 
+class AspectSettings(BaseModel):
+    """Natal wheel defaults chosen by the owner (27 Oct 2026). Transit orbs are a separate setting in Phase 3."""
+    model_config = ConfigDict(frozen=True)
+
+    orbs: dict[str, float] = Field(default_factory=lambda: {"conjunction": 8, "opposition": 8, "trine": 8, "square": 8, "sextile": 6})
+    luminary_bonus: float = 1.0        # extra orb when the Sun or Moon is involved
+    minor_aspects: bool = False
+    minor_orb: float = 2.0
+
+    def model_post_init(self, __context) -> None:  # fill in any orb the user left out
+        merged = {"conjunction": 8, "opposition": 8, "trine": 8, "square": 8, "sextile": 6}
+        merged.update(self.orbs)
+        object.__setattr__(self, "orbs", merged)
+
+
+class Aspect(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    a: str
+    b: str
+    type: str
+    angle: float          # exact angle of this aspect type
+    separation: float     # actual angular distance 0-180
+    orb: float            # |separation - angle|
+    max_orb: float
+    applying: bool
+    exact: bool
+
+
 class Settings(BaseModel):
     """Per-chart calculation settings. Defaults follow CLAUDE.md and the owner's decisions."""
     model_config = ConfigDict(frozen=True)
@@ -33,6 +62,7 @@ class Settings(BaseModel):
     include_chiron: bool = True
     include_lilith: bool = True
     include_fortune: bool = True
+    aspects: AspectSettings = Field(default_factory=AspectSettings)
 
 
 class ChartInput(BaseModel):
@@ -115,6 +145,7 @@ class Provenance(BaseModel):
 class Chart(BaseModel):
     model_config = ConfigDict(frozen=True)
 
+    aspects: list[Aspect] = Field(default_factory=list)
     moment: Moment
     planets: dict[str, BodyPosition]   # ephemeris bodies only (location independent)
     houses: Houses

@@ -1,6 +1,7 @@
 """calculate_chart(): resolve the moment, planets_at + houses_at, then the derived values."""
 from __future__ import annotations
 
+from .aspects import find_aspects
 from .houses import house_of, houses_at
 from .models import BodyPosition, Chart, ChartInput, Houses, Moment, Provenance, Settings, format_longitude
 from .planets import planets_at
@@ -52,8 +53,9 @@ def _assemble(moment: Moment, planets: dict[str, BodyPosition], houses: Houses, 
         time_flags=moment.flags,
         relocated_from=relocated_from,
     )
+    aspects = find_aspects(planets, settings.aspects)
     return Chart(moment=moment, planets=planets, houses=houses, fortune=fortune, planet_houses=placements,
-                 is_day=is_day, provenance=provenance, settings=settings)
+                 is_day=is_day, provenance=provenance, settings=settings, aspects=aspects)
 
 
 def calculate_chart(subject: ChartInput, settings: Settings) -> Chart:
@@ -62,6 +64,17 @@ def calculate_chart(subject: ChartInput, settings: Settings) -> Chart:
     planets = planets_at(moment.jd_ut, settings)
     houses = houses_at(moment.jd_ut, subject.lat, subject.lon, settings)
     return _assemble(moment, planets, houses, settings, subject.lat, subject.lon, None)
+
+
+def chart_at(jd_ut: float, lat: float, lon: float, settings: Settings) -> Chart:
+    """Chart for any instant given as Julian Day (UT): the time-travel primitive. The moment is
+    reported in UTC with a +00:00 offset since no civil clock time was entered."""
+    from datetime import timedelta
+    from .time import moment_from_jd
+    moment = moment_from_jd(jd_ut)
+    planets = planets_at(jd_ut, settings)
+    houses = houses_at(jd_ut, lat, lon, settings)
+    return _assemble(moment, planets, houses, settings, lat, lon, None)
 
 
 def relocate_chart(chart: Chart, lat: float, lon: float) -> Chart:

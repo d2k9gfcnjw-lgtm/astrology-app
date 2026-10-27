@@ -161,6 +161,21 @@ def resolve_moment(
     )
 
 
+def moment_from_jd(jd_ut: float) -> Moment:
+    """A Moment for a Julian Day (UT) with no civil time attached: local = UTC, offset +00:00, no flags."""
+    import swisseph as swe
+    y, m, d, h = swe.revjul(jd_ut, swe.GREG_CAL)
+    total = round(h * 3600 * 1000)  # milliseconds
+    hh, rem = divmod(total, 3600 * 1000)
+    mm, rem = divmod(rem, 60 * 1000)
+    ss, ms = divmod(rem, 1000)
+    utc_naive = datetime(y, m, d, hh, mm, ss, ms * 1000)
+    dt_days = ephemeris.delta_t_days(jd_ut)
+    return Moment(local_datetime=utc_naive, timezone="UTC", utc_offset="+00:00", utc_offset_seconds=0,
+                  utc_datetime=utc_naive.replace(tzinfo=timezone.utc), jd_ut=jd_ut, jd_tt=jd_ut + dt_days,
+                  delta_t_sec=dt_days * 86400, flags=())
+
+
 # Convenience aliases used by the tests and API.
 def _utc_offset_str(self: Moment) -> str:  # pragma: no cover - thin alias
     return self.utc_offset

@@ -64,6 +64,30 @@ def fetch_ephemeris(force: bool) -> bool:
     return ok
 
 
+GEONAMES_URL = "https://download.geonames.org/export/dump/cities15000.zip"
+GEONAMES_DIR = DATA / "geonames"
+
+
+def fetch_geonames(force: bool) -> bool:
+    """GeoNames cities15000 (CC BY 4.0): every city with population over 15,000."""
+    import zipfile
+    GEONAMES_DIR.mkdir(parents=True, exist_ok=True)
+    txt = GEONAMES_DIR / "cities15000.txt"
+    if txt.exists() and txt.stat().st_size > 1_000_000 and not force:
+        print(f"  have   cities15000.txt ({txt.stat().st_size:,} bytes)")
+        return True
+    zip_path = GEONAMES_DIR / "cities15000.zip"
+    try:
+        size = download(GEONAMES_URL, zip_path)
+        with zipfile.ZipFile(zip_path) as z:
+            z.extract("cities15000.txt", GEONAMES_DIR)
+        print(f"  fetched cities15000.txt (zip {size:,} bytes)")
+        return True
+    except Exception as exc:  # noqa: BLE001
+        print(f"  FAILED cities15000: {exc}", file=sys.stderr)
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--ephe-only", action="store_true", help="only the Swiss Ephemeris files (default for now)")
@@ -71,10 +95,13 @@ def main() -> int:
     args = parser.parse_args()
     print(f"Swiss Ephemeris files -> {EPHE_DIR}")
     ok = fetch_ephemeris(args.force)
+    if not args.ephe_only:
+        print(f"GeoNames cities -> {GEONAMES_DIR}")
+        ok = fetch_geonames(args.force) and ok
     if not ok:
         print("Some files failed. Re-run the script; it skips files already present.", file=sys.stderr)
         return 1
-    print("Done. Ephemeris covers 600 CE to 3000 CE.")
+    print("Done. Ephemeris covers 600 CE to 3000 CE. The city search index is built on first use.")
     return 0
 
 

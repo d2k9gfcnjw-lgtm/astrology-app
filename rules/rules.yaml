@@ -27,7 +27,8 @@ context_charts:
     status: confirm
 
 house_system: placidus
-cusp_orb_degrees: 2.5        # planet this close before a cusp counts in the next house (confirm)
+cusp_orb_degrees: 2.5        # planet within 2.5 deg of a cusp acts in BOTH houses ("dual actor"); owner, 27 Oct 2026
+angular_orb_degrees: 12      # a planet within 12 deg of an SR angle (ASC, MC, DSC, IC) is dominant; owner, 27 Oct 2026
 star_rating:
   # raw score thresholds for 1 to 5 stars (tune after testing)
   thresholds: [-60, -20, 10, 40, 70]
@@ -66,7 +67,7 @@ bonuses:
   - id: benefics_angular
     description: Jupiter or Venus within orb of an SR angle, strongest at MC
     bodies: [jupiter, venus]
-    angle_orb_degrees: 8
+    angle_orb_degrees: 12      # owner: dominance within 12 deg of an angle
     weights: {mc: 30, asc: 25, dsc: 20, ic: 20}
     status: core
   - id: sun_in_sr_10_11
@@ -82,7 +83,7 @@ bonuses:
 overrides:
   - id: saturn_dominates_mc
     description: Saturn near the SR MC cancels any benefic bonus at the MC
-    saturn_mc_orb_degrees: 8
+    saturn_mc_orb_degrees: 12  # owner: dominance within 12 deg of an angle
     status: core (Solar Returns book)
 
 goal_profiles:

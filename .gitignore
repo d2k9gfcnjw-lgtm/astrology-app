@@ -23,3 +23,6 @@ dist/
 # Golden test charts contain real birth data: keep them local only
 golden/*
 !golden/README.md
+
+# Owner's digitised reference books (copyrighted): local only, never committed
+reference/

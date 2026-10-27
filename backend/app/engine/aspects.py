@@ -6,7 +6,7 @@ from .models import Aspect, AspectSettings, BodyPosition
 MAJOR = {"conjunction": 0.0, "sextile": 60.0, "square": 90.0, "trine": 120.0, "opposition": 180.0}
 MINOR = {"semisextile": 30.0, "semisquare": 45.0, "sesquiquadrate": 135.0, "quincunx": 150.0}
 LUMINARIES = {"sun", "moon"}
-DEFAULT_EXCLUDE = {"fortune"}
+POINTS = {"node", "chiron", "lilith", "fortune"}
 
 
 def _separation(x: float, y: float) -> float:
@@ -14,7 +14,7 @@ def _separation(x: float, y: float) -> float:
 
 
 def find_aspects(bodies: dict[str, BodyPosition], settings: AspectSettings, exclude: set[str] | None = None) -> list[Aspect]:
-    exclude = DEFAULT_EXCLUDE if exclude is None else exclude
+    exclude = (set() if settings.include_points else POINTS) if exclude is None else exclude
     table = dict(MAJOR)
     if settings.minor_aspects:
         table.update(MINOR)

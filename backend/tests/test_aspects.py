@@ -47,7 +47,8 @@ def test_minor_aspects_off_by_default_and_on_when_asked():
     assert on and on[0].type == "quincunx"
 
 
-def test_fortune_and_points_can_be_excluded():
-    bodies = {"sun": body(0), "fortune": body(120), "node": body(240)}
-    a = find_aspects(bodies, AspectSettings(), exclude={"fortune", "node"})
-    assert a == []
+def test_points_excluded_by_default_and_included_on_request():
+    bodies = {"sun": body(0), "fortune": body(120), "node": body(240), "chiron": body(60)}
+    assert find_aspects(bodies, AspectSettings()) == []
+    on = find_aspects(bodies, AspectSettings(include_points=True))
+    assert {(a.a, a.b, a.type) for a in on} >= {("sun", "node", "trine"), ("sun", "chiron", "sextile")}

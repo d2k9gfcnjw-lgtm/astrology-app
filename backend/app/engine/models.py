@@ -26,6 +26,7 @@ class AspectSettings(BaseModel):
     luminary_bonus: float = 1.0        # extra orb when the Sun or Moon is involved
     minor_aspects: bool = False
     minor_orb: float = 2.0
+    include_points: bool = False       # aspects to Node, Chiron, Lilith and Fortune
 
     def model_post_init(self, __context) -> None:  # fill in any orb the user left out
         merged = {"conjunction": 8, "opposition": 8, "trine": 8, "square": 8, "sextile": 6}

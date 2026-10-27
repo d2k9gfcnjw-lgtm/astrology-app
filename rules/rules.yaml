@@ -2,6 +2,29 @@
 # status: core    = widely documented Discepolo rule
 # status: confirm = starting assumption; check against his books before trusting
 # Weights are starting points. Tune them as you study and track outcomes.
+# Books owned: Solar Returns; Transits and Solar Returns; Lunar Returns.
+
+# The finder always weighs four charts. How each one changes the score is
+# decided with the owner in Phase 5; until then these are display-only.
+context_charts:
+  natal:
+    use: SR Ascendant's natal house, natal intercepted signs
+    status: core
+  year_transits:
+    use: heavy transits (Saturn, Uranus, Neptune, Pluto, Mars stations) to
+         natal points birthday to birthday; avoid SR placements that repeat
+         the same pressure, favor ones that support the stressed area
+    weight: 0          # display-only until confirmed
+    status: confirm
+  previous_sr:
+    use: what the current year set up; compare houses emphasized
+    weight: 0
+    status: confirm
+  base_sr:
+    use: the chart if the native stays home; every result reports what it
+         fixes or worsens versus this one
+    weight: 0
+    status: confirm
 
 house_system: placidus
 cusp_orb_degrees: 2.5        # planet this close before a cusp counts in the next house (confirm)

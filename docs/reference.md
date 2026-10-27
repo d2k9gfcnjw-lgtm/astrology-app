@@ -106,13 +106,21 @@ against Discepolo's books.
 
 ## Open questions
 
-- [ ] Only for you, or will others ever use it? (license, local vs hosted)
-- [ ] Which Discepolo books do you own? Check "confirm" rules against
-      "Transits and Solar Returns" and "Aimed Solar and Lunar Returns"
-- [ ] Zodiacal releasing conventions you follow
-- [ ] Ayanamsa if not Lahiri; North or South Indian chart style
+Answered October 2026:
+- [x] Personal use only. AGPL covers it; no Professional License needed.
+- [x] Books owned: "Solar Returns", "Transits and Solar Returns",
+      "Lunar Returns". Check the "confirm" rules in rules.yaml against these.
+- [x] Vedic is tertiary, for gemstone checks: Lahiri, whole sign, mean node,
+      North Indian as defaults (all settings).
+
+Still open:
+- [ ] How the previous SR, base SR and year's transits should change the
+      finder score (decide in Phase 5 with the books open)
+- [ ] Functional benefic/malefic table for the Vedic view (Phase 8)
+- [ ] Zodiacal releasing conventions (Phase 8)
 - [ ] Default population floor and airport distance
 - [ ] Countries or regions to always exclude
+- [ ] Astrocartography orb width default
 
 ## Sources
 

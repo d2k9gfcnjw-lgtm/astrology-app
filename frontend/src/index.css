@@ -46,6 +46,9 @@ footer { grid-area: footer; background: var(--panel); border-top: 1px solid var(
 .badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .badge { opacity: 0.45; } .badge.on { opacity: 1; border-color: var(--accent); }
 .year-ahead section h3 { margin: 10px 0 4px; font-size: 15px; }
+.year-ahead section, .year-ahead > table { max-width: 100%; }
+.year-ahead .scroll { overflow-x: auto; width: 100%; }
+.year-ahead .scroll table { min-width: 560px; }
 .year-ahead table { border-collapse: collapse; background: #fff; font-size: 13px; width: 100%; }
 .year-ahead th, .year-ahead td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; }
 .year-ahead tbody tr { cursor: pointer; } .year-ahead tbody tr:hover td { background: #eef7f6; }

@@ -81,35 +81,35 @@ export function YearAheadView({ subject, natalInput, settings, defaultYear, onJu
       {report && byBody && groups.map((g) => (
         <section key={g.body}>
           <h3>{BODY_NAMES[g.body]} <small>{g.items.length} exact hits</small></h3>
-          <table><thead><tr><th>Local time</th><th>Aspect</th><th>Natal point</th><th>Pass</th><th>Within orb</th></tr></thead>
-            <tbody>{g.items.map(row)}</tbody></table>
+          <div className="scroll"><table><thead><tr><th>Local time</th><th>Aspect</th><th>Natal point</th><th>Pass</th><th>Within orb</th></tr></thead>
+            <tbody>{g.items.map(row)}</tbody></table></div>
         </section>
       ))}
       {report && !byBody && (
-        <table><thead><tr><th>Local time</th><th>Transit</th><th>Aspect</th><th>Natal point</th><th>Pass</th><th>Within orb</th></tr></thead>
-          <tbody>{visible.map(row)}</tbody></table>
+        <div className="scroll"><table><thead><tr><th>Local time</th><th>Transit</th><th>Aspect</th><th>Natal point</th><th>Pass</th><th>Within orb</th></tr></thead>
+          <tbody>{visible.map(row)}</tbody></table></div>
       )}
       {report && showIngress && report.ingresses.length > 0 && (
         <section>
           <h3>Ingresses <small>{report.ingresses.length}</small></h3>
-          <table><thead><tr><th>Local time</th><th>Transit</th><th>Enters</th><th></th></tr></thead>
+          <div className="scroll"><table><thead><tr><th>Local time</th><th>Transit</th><th>Enters</th><th></th></tr></thead>
             <tbody>{report.ingresses.filter((i) => !bodies || bodies.has(i.body)).map((i) => (
               <tr key={`${i.body}${i.kind}${i.jd_ut}`} onClick={() => onJump(i.jd_ut)}>
                 <td className="nowrap">{fmt(i.local_datetime)}</td><td>{BODY_NAMES[i.body]}{i.retrograde ? ' ℞' : ''}</td>
                 <td>{i.kind === 'house' ? `natal house ${i.entered}` : i.entered}</td><td><small>{i.retrograde ? 'retrograde, back into' : ''}</small></td>
-              </tr>))}</tbody></table>
+              </tr>))}</tbody></table></div>
         </section>
       )}
       {report && showStations && report.stations.length > 0 && (
         <section>
           <h3>Stations <small>{report.stations.length}</small></h3>
-          <table><thead><tr><th>Local time</th><th>Transit</th><th>Turns</th><th>At</th><th>Near natal</th></tr></thead>
+          <div className="scroll"><table><thead><tr><th>Local time</th><th>Transit</th><th>Turns</th><th>At</th><th>Near natal</th></tr></thead>
             <tbody>{report.stations.filter((s) => !bodies || bodies.has(s.body)).map((s) => (
               <tr key={`${s.body}${s.jd_ut}`} onClick={() => onJump(s.jd_ut)}>
                 <td className="nowrap">{fmt(s.local_datetime)}</td><td>{BODY_NAMES[s.body]}</td><td>{s.kind}</td>
                 <td>{formatDM(s.lon)} {signOf(s.lon)}</td>
                 <td><small>{s.near.map((n) => `${n.aspect} ${label(n.natal_point)} (${n.orb}°)`).join(', ') || '–'}</small></td>
-              </tr>))}</tbody></table>
+              </tr>))}</tbody></table></div>
         </section>
       )}
     </div>

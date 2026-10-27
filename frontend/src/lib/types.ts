@@ -187,6 +187,10 @@ export interface SubjectIn {
   lon: number
   timezone: string | null
   utc_offset_override: string | null
+  home_place_name: string
+  home_lat: number | null
+  home_lon: number | null
+  home_timezone: string | null
   settings: Partial<Settings>
 }
 
@@ -280,4 +284,34 @@ export interface SolveResult {
   previous: SolveHit[]
   next: SolveHit[]
   nearest: SolveHit | null
+}
+
+export interface ReturnChart {
+  kind: 'solar' | 'lunar'
+  year: number
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  timezone: string | null
+  place: { lat: number; lon: number; name: string }
+  precessed: boolean
+  chart: Chart
+  natal_house_of: Record<string, number>
+  houses_of: Record<string, number[]>
+  angular: { body: string; angle: string; orb: number }[]
+  stelliums: { house: number; bodies: string[] }[]
+  flags: { id: string; severity: string; text: string }[]
+}
+
+export interface ReturnSet {
+  chosen: ReturnChart
+  previous: ReturnChart
+  base: ReturnChart
+}
+
+export interface LunarInstant {
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  timezone: string | null
 }

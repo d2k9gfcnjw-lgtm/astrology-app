@@ -5,7 +5,8 @@ import { CitySearch } from './CitySearch'
 
 const EMPTY: SubjectIn = {
   name: '', kind: 'person', tags: [], notes: '', datetime_local: '', time_confidence: 'exact', place_name: '',
-  lat: 0, lon: 0, timezone: null, utc_offset_override: null, settings: {},
+  lat: 0, lon: 0, timezone: null, utc_offset_override: null,
+  home_place_name: '', home_lat: null, home_lon: null, home_timezone: null, settings: {},
 }
 
 interface Props {
@@ -84,6 +85,9 @@ export function SubjectForm({ initial, onSaved, onPreview, onCancel }: Props) {
           {resolved.flags.map((fl) => <div key={fl} className="flag">⚠ {resolved.flag_text[fl]}</div>)}
         </div>
       )}
+      <label>Lives in <small>(default place for lunar returns and the base solar return)</small>
+        <CitySearch value={f.home_place_name} onPick={(c) => set({ home_place_name: c.label, home_lat: c.lat, home_lon: c.lon, home_timezone: c.timezone })} placeholder="City where the person lives now" />
+      </label>
       <label>Tags<input value={tags} placeholder="comma separated" onChange={(e) => setTags(e.target.value)} /></label>
       <label>Notes<textarea value={f.notes} rows={2} onChange={(e) => set({ notes: e.target.value })} /></label>
       {err && <div className="error">{err}</div>}

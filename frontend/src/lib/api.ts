@@ -1,4 +1,4 @@
-import type { Chart, City, Keyframe, ResolvedTime, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
+import type { Chart, City, Keyframe, LunarInstant, ResolvedTime, ReturnChart, ReturnSet, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -46,6 +46,20 @@ export const api = {
   subjectChart: (id: string) => call<Chart>('GET', `/api/subjects/${id}/chart`),
   solve: (body: string, target_lon: number, jd_ut: number, settings: Settings) =>
     call<SolveResult>('POST', '/api/transits/solve', { body, target_lon, jd_ut, settings }),
+  solarReturn: (id: string, year: number, place: { lat: number; lon: number; name: string } | null, precessed: boolean) => {
+    const p = new URLSearchParams({ year: String(year), precessed: String(precessed) })
+    if (place) { p.set('lat', String(place.lat)); p.set('lon', String(place.lon)); p.set('place_name', place.name) }
+    return call<ReturnSet>('GET', `/api/subjects/${id}/solar-return?${p}`)
+  },
+  solarReturnUnsaved: (subject: { datetime_local: string; lat: number; lon: number; timezone: string | null; utc_offset_override: string | null },
+    home: { lat: number; lon: number; name: string } | null, year: number, place: { lat: number; lon: number; name: string } | null, precessed: boolean, settings: Settings) =>
+    call<ReturnSet>('POST', '/api/returns/solar', { subject, home, year, lat: place?.lat ?? null, lon: place?.lon ?? null, place_name: place?.name ?? '', precessed, settings }),
+  lunarReturns: (id: string, year: number) => call<LunarInstant[]>('GET', `/api/subjects/${id}/lunar-returns?year=${year}`),
+  lunarReturn: (id: string, jd_ut: number, place: { lat: number; lon: number; name: string } | null) => {
+    const p = new URLSearchParams({ jd_ut: String(jd_ut) })
+    if (place) { p.set('lat', String(place.lat)); p.set('lon', String(place.lon)); p.set('place_name', place.name) }
+    return call<ReturnChart>('GET', `/api/subjects/${id}/lunar-return?${p}`)
+  },
   yearAhead: (id: string, year: number) => call<YearAhead>('GET', `/api/subjects/${id}/year-ahead?year=${year}`),
   yearAheadUnsaved: (subject: { datetime_local: string; lat: number; lon: number; timezone: string | null; utc_offset_override: string | null }, year: number, settings: Settings) =>
     call<YearAhead>('POST', '/api/transits/year-ahead', { subject, year, settings }),

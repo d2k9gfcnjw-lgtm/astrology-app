@@ -48,6 +48,7 @@ export function Library({ selectedId, refreshKey, onOpen, onEdit, onNew }: Props
             <button className="link" onClick={() => onOpen(s)}>
               <b>{s.name}</b>
               <small>{s.datetime_local.replace('T', ' ').slice(0, 16)} · {s.place_name || `${s.lat.toFixed(2)}, ${s.lon.toFixed(2)}`}</small>
+              {s.home_place_name && <small>lives in {s.home_place_name}</small>}
               {s.tags.length > 0 && <small className="tags">{s.tags.join(', ')}</small>}
             </button>
             <span className="actions">

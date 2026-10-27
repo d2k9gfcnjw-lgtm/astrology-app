@@ -81,7 +81,24 @@ def load_golden_charts() -> list[GoldenChart]:
     return [GoldenChart(p) for p in files]
 
 
+class GoldenReturn(GoldenChart):
+    """An astro.com solar return sheet: same table, plus the natal chart it belongs to and the year."""
+
+    def __init__(self, path: Path):
+        super().__init__(path)
+        raw = yaml.safe_load(path.read_text())
+        self.year = int(raw["year"])
+        self.natal = GoldenChart(GOLDEN_DIR / raw["natal"])
+        # astro.com prints the chart at the rounded minute; the JD(TT) on the sheet is that exact instant.
+        self.jd_ut = self.jd_tt - self.delta_t_sec / 86400
+
+
+def load_golden_returns() -> list[GoldenReturn]:
+    return [GoldenReturn(p) for p in sorted(GOLDEN_DIR.glob("sr_*.yaml"))]
+
+
 GOLDEN = load_golden_charts()
+GOLDEN_SR = load_golden_returns()
 
 
 def pytest_collection_modifyitems(config, items):
@@ -100,4 +117,11 @@ def pytest_configure(config):
 def golden(request) -> GoldenChart:
     if request.param is None:
         pytest.skip("no golden charts available")
+    return request.param
+
+
+@pytest.fixture(params=GOLDEN_SR or [None], ids=[g.path.stem for g in GOLDEN_SR] or ["no-golden-sr"])
+def golden_sr(request) -> GoldenReturn:
+    if request.param is None:
+        pytest.skip("no golden solar returns available")
     return request.param

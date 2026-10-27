@@ -27,7 +27,8 @@ context_charts:
     status: confirm
 
 house_system: placidus
-cusp_orb_degrees: 2.5        # planet within 2.5 deg of a cusp acts in BOTH houses ("dual actor"); owner, 27 Oct 2026
+cusp_orb_degrees: 2.5        # Rule 1 (Thirty Rules): a planet within 2.5 deg before or after a cusp works in BOTH houses,
+                             # in aimed solar and lunar returns, transits and the radix. Owner, 27 Oct 2026.
 angular_orb_degrees: 12      # a planet within 12 deg of an SR angle (ASC, MC, DSC, IC) is dominant; owner, 27 Oct 2026
 star_rating:
   # raw score thresholds for 1 to 5 stars (tune after testing)
@@ -37,6 +38,30 @@ hard_filters:
   - id: sr_asc_in_natal_1_6_12
     description: SR Ascendant falls in natal 1st, 6th or 12th house
     houses: [1, 6, 12]
+    status: core
+  - id: mars_saturn_same_house
+    description: >
+      Mars and Saturn in the same house of a solar or lunar return, whatever the house,
+      except the 3rd and the 9th. (Thirty Rules; owner, 27 Oct 2026.)
+    bodies: [mars, saturn]
+    allowed_houses: [3, 9]
+    status: core
+  - id: stellium_1_12_reads_as_asc_in_12
+    description: >
+      A stellium between the 1st and the 12th houses, even of positive planets such as
+      Jupiter, Venus and Mercury, is read exactly as an Ascendant in the 12th house.
+      (Thirty Rules; owner, 27 Oct 2026.)
+    houses: [1, 12]
+    min_bodies: 3
+    read_as: asc_in_12
+    status: core
+  - id: stellium_8_reads_as_asc_in_12
+    description: >
+      A stellium in the 8th house, even of positive planets, is read exactly as an
+      Ascendant in the 12th house. (Thirty Rules; owner, 27 Oct 2026.)
+    houses: [8]
+    min_bodies: 3
+    read_as: asc_in_12
     status: core
 
 penalties:

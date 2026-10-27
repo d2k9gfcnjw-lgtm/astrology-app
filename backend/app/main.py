@@ -19,6 +19,7 @@ from .engine.planets import planets_at
 from .engine.time import FLAG_TEXT, NoTimeZoneError, resolve_moment
 from .engine.solver import PAD_SOLVE_DAYS, Track
 from .engine.transits import YearAhead, year_ahead
+from .engine.returns import ReturnChart, ReturnSet, lunar_return, lunar_return_instants, return_set
 from .storage import ChartLibrary, Subject, SubjectIn
 
 _library: ChartLibrary | None = None
@@ -321,5 +322,91 @@ def year_ahead_subject(sid: str, year: int):
         return year_ahead(chart, year, settings.transits, chart.moment.timezone)
     except (NoTimeZoneError, ValueError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+def _natal_for(s: Subject) -> tuple[Chart, Settings]:
+    settings = Settings(**s.settings) if s.settings else Settings()
+    chart = calculate_chart(ChartInput(datetime_local=s.datetime_local, lat=s.lat, lon=s.lon, timezone=s.timezone,
+                                       utc_offset_override=s.utc_offset_override), settings)
+    return chart, settings
+
+
+def _home_of(s: Subject) -> tuple[float, float, str]:
+    if s.home_lat is not None and s.home_lon is not None:
+        return s.home_lat, s.home_lon, s.home_place_name
+    return s.lat, s.lon, s.place_name
+
+
+@app.get("/api/subjects/{sid}/solar-return", response_model=ReturnSet)
+def subject_solar_return(sid: str, year: int, lat: float | None = None, lon: float | None = None, precessed: bool = False, place_name: str = ""):
+    """The chosen SR (at lat/lon, default home), the previous SR and the base SR, both at home."""
+    try:
+        s = library().get(sid)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="subject not found")
+    try:
+        natal, _ = _natal_for(s)
+        hlat, hlon, hname = _home_of(s)
+        chosen = (lat, lon) if lat is not None and lon is not None else (hlat, hlon)
+        return return_set(natal, year, chosen, (hlat, hlon), precessed, place_name if lat is not None else hname, hname)
+    except (NoTimeZoneError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+class SolarReturnRequest(BaseModel):
+    subject: ChartInput
+    home: dict | None = None          # {"lat", "lon", "name"}
+    year: int
+    lat: float | None = None
+    lon: float | None = None
+    place_name: str = ""
+    precessed: bool = False
+    settings: Settings = Field(default_factory=Settings)
+
+
+@app.post("/api/returns/solar", response_model=ReturnSet)
+def unsaved_solar_return(req: SolarReturnRequest):
+    try:
+        natal = calculate_chart(req.subject, req.settings)
+        home = (req.home["lat"], req.home["lon"]) if req.home else (req.subject.lat, req.subject.lon)
+        hname = (req.home or {}).get("name", "")
+        chosen = (req.lat, req.lon) if req.lat is not None and req.lon is not None else home
+        return return_set(natal, req.year, chosen, home, req.precessed, req.place_name if req.lat is not None else hname, hname)
+    except (NoTimeZoneError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/subjects/{sid}/lunar-returns")
+def subject_lunar_returns(sid: str, year: int) -> list[dict]:
+    from .engine.returns import _local, _utc
+    from .engine.time import zone_name_for
+    try:
+        s = library().get(sid)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="subject not found")
+    natal, _ = _natal_for(s)
+    hlat, hlon, _n = _home_of(s)
+    tz = zone_name_for(hlat, hlon)
+    return [{"jd_ut": jd, "utc_datetime": _utc(jd), "local_datetime": _local(jd, tz), "timezone": tz} for jd in lunar_return_instants(natal, year)]
+
+
+@app.get("/api/subjects/{sid}/lunar-return", response_model=ReturnChart)
+def subject_lunar_return(sid: str, jd_ut: float, lat: float | None = None, lon: float | None = None, place_name: str = ""):
+    try:
+        s = library().get(sid)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="subject not found")
+    natal, _ = _natal_for(s)
+    hlat, hlon, hname = _home_of(s)
+    if lat is None or lon is None:
+        lat, lon, place_name = hlat, hlon, hname
+    try:
+        return lunar_return(natal, jd_ut, lat, lon, place_name)
     except EphemerisDataMissing as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc

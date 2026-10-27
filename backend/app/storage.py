@@ -24,7 +24,8 @@ DEFAULT_KEY_PATH = Path(os.environ.get("ASTRO_KEY_PATH", ROOT / "data" / "keys" 
 Kind = Literal["person", "event", "place", "question"]
 TimeConfidence = Literal["exact", "within_5_min", "within_30_min", "unknown"]
 
-SECRET_FIELDS = ("name", "notes", "datetime_local", "place_name", "lat", "lon", "timezone", "utc_offset_override")
+SECRET_FIELDS = ("name", "notes", "datetime_local", "place_name", "lat", "lon", "timezone", "utc_offset_override",
+                 "home_place_name", "home_lat", "home_lon", "home_timezone")
 
 
 class SubjectIn(BaseModel):
@@ -39,6 +40,11 @@ class SubjectIn(BaseModel):
     lon: float = Field(ge=-180, le=180)
     timezone: str | None = None
     utc_offset_override: str | None = None
+    # Where the person lives now: the default place for lunar returns and the base solar return.
+    home_place_name: str = ""
+    home_lat: float | None = Field(default=None, ge=-90, le=90)
+    home_lon: float | None = Field(default=None, ge=-180, le=180)
+    home_timezone: str | None = None
     settings: dict = Field(default_factory=dict)
 
 
@@ -100,6 +106,8 @@ class ChartLibrary:
     def _open(self, blob: bytes) -> dict:
         data = json.loads(self._fernet.decrypt(blob).decode("utf-8"))
         data["datetime_local"] = datetime.fromisoformat(data["datetime_local"])
+        for k in SECRET_FIELDS:  # rows written before a field existed
+            data.setdefault(k, "" if k in ("name", "notes", "place_name", "home_place_name") else None)
         return data
 
     def _row_to_subject(self, row: sqlite3.Row) -> Subject:

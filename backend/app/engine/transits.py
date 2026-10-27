@@ -149,7 +149,32 @@ def transit_hits(chart: Chart, ts: TransitSettings, jd0: float, jd1: float, time
                             orb_exit_local=_local_iso(exit_, timezone_name) if exit_ else None,
                         ))
     out.sort(key=lambda h: h.jd_ut)
-    return out
+    return _dedupe_axes(out)
+
+
+AXIS_PARTNER = {"asc": "dsc", "dsc": "asc", "mc": "ic", "ic": "mc"}
+for _i in range(1, 13):
+    AXIS_PARTNER[f"cusp_{_i}"] = f"cusp_{(_i + 5) % 12 + 1}"
+PREFERRED_POINT = {"dsc": "asc", "ic": "mc"}
+
+
+def _dedupe_axes(hits: list[Hit]) -> list[Hit]:
+    """A square to the AC is the same instant as a square to the DC, a conjunction to the DC is an
+    opposition to the AC: keep one row per instant and body, preferring AC/MC and the conjunction."""
+    keep: list[Hit] = []
+    for h in hits:
+        dup = None
+        for k in keep:
+            if k.body == h.body and abs(k.jd_ut - h.jd_ut) < EDGE and AXIS_PARTNER.get(k.natal_point) == h.natal_point:
+                dup = k
+                break
+        if dup is None:
+            keep.append(h)
+            continue
+        rank = lambda x: (x.aspect != "conjunction", x.natal_point in PREFERRED_POINT, x.natal_point.startswith("cusp_") and int(x.natal_point[5:]) > 6)
+        if rank(h) < rank(dup):
+            keep[keep.index(dup)] = h
+    return keep
 
 
 def ingresses(chart: Chart, ts: TransitSettings, jd0: float, jd1: float, timezone_name: str | None = None) -> list[Ingress]:

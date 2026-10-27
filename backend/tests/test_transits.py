@@ -78,3 +78,16 @@ def test_moon_off_by_default_and_on_when_asked():
     assert not any(h.body == "moon" for h in off.hits)
     on = year_ahead(chart, 2025, TransitSettings(bodies=["moon"], natal_points=["sun"], aspects=["conjunction"], include_ingresses=False, include_stations=False), timezone="America/Chicago")
     assert 12 <= len(on.hits) <= 14
+
+
+def test_axis_hits_are_not_duplicated():
+    chart = calculate_chart(CHICAGO, Settings())
+    rep = year_ahead(chart, 2025, TransitSettings(bodies=["saturn", "jupiter"]), timezone="America/Chicago")
+    seen = {}
+    for h in rep.hits:
+        key = (h.body, round(h.jd_ut, 4))
+        assert key not in seen, (seen[key], h)
+        seen[key] = h
+    angle_hits = [h for h in rep.hits if h.natal_point in ("asc", "dsc", "mc", "ic")]
+    assert angle_hits, "angles are natal points by default"
+    assert all(h.natal_point in ("asc", "mc") or h.aspect == "conjunction" for h in angle_hits)

@@ -1,4 +1,4 @@
-import type { Chart, City, Keyframe, ResolvedTime, Settings, Subject, SubjectIn } from './types'
+import type { Chart, City, Keyframe, ResolvedTime, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -44,4 +44,9 @@ export const api = {
   updateSubject: (id: string, s: SubjectIn) => call<Subject>('PUT', `/api/subjects/${id}`, s),
   deleteSubject: (id: string) => call<void>('DELETE', `/api/subjects/${id}`),
   subjectChart: (id: string) => call<Chart>('GET', `/api/subjects/${id}/chart`),
+  solve: (body: string, target_lon: number, jd_ut: number, settings: Settings) =>
+    call<SolveResult>('POST', '/api/transits/solve', { body, target_lon, jd_ut, settings }),
+  yearAhead: (id: string, year: number) => call<YearAhead>('GET', `/api/subjects/${id}/year-ahead?year=${year}`),
+  yearAheadUnsaved: (subject: { datetime_local: string; lat: number; lon: number; timezone: string | null; utc_offset_override: string | null }, year: number, settings: Settings) =>
+    call<YearAhead>('POST', '/api/transits/year-ahead', { subject, year, settings }),
 }

@@ -36,6 +36,20 @@ footer { grid-area: footer; background: var(--panel); border-top: 1px solid var(
 .planet-deg { font-size: 11px; fill: #333; }
 .planet.selected .planet-deg { fill: #b5179e; font-weight: 600; }
 .wheel-note { font-size: 12px; fill: #999; }
+.transit-deg { fill: #1d4ed8; }
+.wheel.biwheel { touch-action: none; }
+.solve-menu { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin-top: 6px; }
+.year-ahead { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 10px; }
+.year-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.year-head input[type="number"] { width: 80px; }
+.year-head .window { font-size: 13px; color: var(--muted); }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.badge { opacity: 0.45; } .badge.on { opacity: 1; border-color: var(--accent); }
+.year-ahead section h3 { margin: 10px 0 4px; font-size: 15px; }
+.year-ahead table { border-collapse: collapse; background: #fff; font-size: 13px; width: 100%; }
+.year-ahead th, .year-ahead td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.year-ahead tbody tr { cursor: pointer; } .year-ahead tbody tr:hover td { background: #eef7f6; }
+.nowrap { white-space: nowrap; }
 .provenance { font-size: 12px; color: var(--muted); padding: 6px; text-align: center; }
 .empty-state { color: var(--muted); padding: 40px; }
 

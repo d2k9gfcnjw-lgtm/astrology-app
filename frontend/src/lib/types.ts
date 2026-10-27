@@ -11,6 +11,26 @@ export interface AspectSettings {
   include_points: boolean
 }
 
+export interface TransitSettings {
+  bodies: string[]
+  natal_points: string[]
+  aspects: string[]
+  orbs: Record<string, number>
+  include_ingresses: boolean
+  include_sign_ingresses: boolean
+  include_stations: boolean
+}
+
+export const DEFAULT_TRANSITS: TransitSettings = {
+  bodies: ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'],
+  natal_points: ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'asc', 'dsc', 'mc', 'ic'],
+  aspects: ['conjunction', 'opposition', 'trine', 'square', 'sextile'],
+  orbs: { sun: 3, moon: 3, mercury: 3, venus: 3, mars: 3, jupiter: 3, saturn: 3, uranus: 2, neptune: 1.5, pluto: 1.5, chiron: 2, node: 2, lilith: 2 },
+  include_ingresses: true,
+  include_sign_ingresses: true,
+  include_stations: true,
+}
+
 export interface Settings {
   zodiac: Zodiac
   ayanamsa: 'lahiri' | 'fagan_bradley' | 'raman' | 'krishnamurti'
@@ -24,6 +44,7 @@ export interface Settings {
   include_lilith: boolean
   include_fortune: boolean
   aspects: AspectSettings
+  transits: TransitSettings
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -45,6 +66,7 @@ export const DEFAULT_SETTINGS: Settings = {
     minor_orb: 2,
     include_points: false,
   },
+  transits: DEFAULT_TRANSITS,
 }
 
 export interface BodyPosition {
@@ -187,4 +209,75 @@ export interface WheelData {
   mc: number
   aspects: Aspect[]
   systemUsed: HouseSystem
+}
+
+export interface TransitHit {
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  body: string
+  aspect: string
+  angle: number
+  natal_point: string
+  natal_lon: number
+  transit_lon: number
+  retrograde: boolean
+  pass_index: number
+  pass_count: number
+  orb: number
+  orb_enter_jd: number | null
+  orb_exit_jd: number | null
+  orb_enter_local: string | null
+  orb_exit_local: string | null
+}
+
+export interface Ingress {
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  body: string
+  kind: 'house' | 'sign'
+  entered: string
+  retrograde: boolean
+  lon: number
+}
+
+export interface StationEvent {
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  body: string
+  kind: 'retrograde' | 'direct'
+  lon: number
+  near: { natal_point: string; aspect: string; orb: number }[]
+}
+
+export interface YearAhead {
+  year: number
+  jd_start: number
+  jd_end: number
+  utc_start: string
+  utc_end: string
+  local_start: string
+  local_end: string
+  timezone: string | null
+  settings: TransitSettings
+  hits: TransitHit[]
+  ingresses: Ingress[]
+  stations: StationEvent[]
+  counts: Record<string, number>
+}
+
+export interface SolveHit {
+  jd_ut: number
+  utc_datetime: string
+  retrograde: boolean
+  pass_index: number
+  pass_count: number
+}
+
+export interface SolveResult {
+  previous: SolveHit[]
+  next: SolveHit[]
+  nearest: SolveHit | null
 }

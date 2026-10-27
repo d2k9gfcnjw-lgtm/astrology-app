@@ -17,6 +17,8 @@ from .engine.houses import houses_at
 from .engine.models import Chart, ChartInput, Houses, Moment, Settings
 from .engine.planets import planets_at
 from .engine.time import FLAG_TEXT, NoTimeZoneError, resolve_moment
+from .engine.solver import PAD_SOLVE_DAYS, Track
+from .engine.transits import YearAhead, year_ahead
 from .storage import ChartLibrary, Subject, SubjectIn
 
 _library: ChartLibrary | None = None
@@ -252,3 +254,72 @@ def subject_chart(sid: str, lat: float | None = None, lon: float | None = None):
         from .engine.chart import relocate_chart
         chart = relocate_chart(chart, lat, lon)
     return chart
+
+
+class SolveRequest(BaseModel):
+    body: str
+    target_lon: float
+    jd_ut: float
+    settings: Settings = Field(default_factory=Settings)
+
+
+class SolveHit(BaseModel):
+    jd_ut: float
+    utc_datetime: str
+    retrograde: bool
+    pass_index: int
+    pass_count: int
+
+
+@app.post("/api/transits/solve")
+def solve_transit(req: SolveRequest) -> dict:
+    """Previous and next instants when `body` is exactly on `target_lon`, around jd_ut (the drag primitive)."""
+    from .engine.time import moment_from_jd
+    span = PAD_SOLVE_DAYS.get(req.body, 400)
+    try:
+        hits = Track(req.body, req.jd_ut - span, req.jd_ut + span, req.settings).crossings(req.target_lon % 360)
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except KeyError:
+        raise HTTPException(status_code=422, detail=f"unknown body {req.body}")
+    def out(c):
+        return SolveHit(jd_ut=c.jd_ut, utc_datetime=moment_from_jd(c.jd_ut).utc_datetime.replace(tzinfo=None).isoformat(timespec="seconds"),
+                        retrograde=c.retrograde, pass_index=c.pass_index, pass_count=c.pass_count)
+    previous = [out(c) for c in hits if c.jd_ut <= req.jd_ut]
+    nxt = [out(c) for c in hits if c.jd_ut > req.jd_ut]
+    nearest = min(previous + nxt, key=lambda h: abs(h.jd_ut - req.jd_ut), default=None)
+    return {"previous": previous, "next": nxt, "nearest": nearest}
+
+
+class YearAheadRequest(BaseModel):
+    subject: ChartInput
+    year: int
+    settings: Settings = Field(default_factory=Settings)
+
+
+@app.post("/api/transits/year-ahead", response_model=YearAhead)
+def year_ahead_unsaved(req: YearAheadRequest):
+    try:
+        chart = calculate_chart(req.subject, req.settings)
+        return year_ahead(chart, req.year, req.settings.transits, chart.moment.timezone)
+    except (NoTimeZoneError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/subjects/{sid}/year-ahead", response_model=YearAhead)
+def year_ahead_subject(sid: str, year: int):
+    try:
+        s = library().get(sid)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="subject not found")
+    settings = Settings(**s.settings) if s.settings else Settings()
+    try:
+        chart = calculate_chart(ChartInput(datetime_local=s.datetime_local, lat=s.lat, lon=s.lon, timezone=s.timezone,
+                                           utc_offset_override=s.utc_offset_override), settings)
+        return year_ahead(chart, year, settings.transits, chart.moment.timezone)
+    except (NoTimeZoneError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

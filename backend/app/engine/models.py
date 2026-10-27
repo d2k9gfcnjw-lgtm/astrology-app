@@ -48,6 +48,29 @@ class Aspect(BaseModel):
     exact: bool
 
 
+class TransitSettings(BaseModel):
+    """Transit defaults from the owner (27 Oct 2026): outer planets primary, Sun and Moon off,
+    orbs 3 deg for the faster bodies, 2 for Uranus, 1.5 for Neptune and Pluto. Marked "confirm"
+    against Discepolo's Thirty Rules."""
+    model_config = ConfigDict(frozen=True)
+
+    bodies: list[str] = Field(default_factory=lambda: ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"])
+    natal_points: list[str] = Field(default_factory=lambda: ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn",
+                                                             "uranus", "neptune", "pluto", "asc", "dsc", "mc", "ic"])
+    aspects: list[str] = Field(default_factory=lambda: ["conjunction", "opposition", "trine", "square", "sextile"])
+    orbs: dict[str, float] = Field(default_factory=lambda: {"sun": 3, "moon": 3, "mercury": 3, "venus": 3, "mars": 3, "jupiter": 3,
+                                                            "saturn": 3, "uranus": 2, "neptune": 1.5, "pluto": 1.5, "chiron": 2, "node": 2, "lilith": 2})
+    include_ingresses: bool = True
+    include_sign_ingresses: bool = True
+    include_stations: bool = True
+
+    def model_post_init(self, __context) -> None:
+        merged = {"sun": 3, "moon": 3, "mercury": 3, "venus": 3, "mars": 3, "jupiter": 3, "saturn": 3, "uranus": 2,
+                  "neptune": 1.5, "pluto": 1.5, "chiron": 2, "node": 2, "lilith": 2}
+        merged.update(self.orbs)
+        object.__setattr__(self, "orbs", merged)
+
+
 class Settings(BaseModel):
     """Per-chart calculation settings. Defaults follow CLAUDE.md and the owner's decisions."""
     model_config = ConfigDict(frozen=True)
@@ -64,6 +87,7 @@ class Settings(BaseModel):
     include_lilith: bool = True
     include_fortune: bool = True
     aspects: AspectSettings = Field(default_factory=AspectSettings)
+    transits: TransitSettings = Field(default_factory=TransitSettings)
 
 
 class ChartInput(BaseModel):

@@ -1,129 +1,253 @@
-# Aimed solar return scoring rules (Ciro Discepolo method), starter version.
-# status: core    = widely documented Discepolo rule
-# status: confirm = starting assumption; check against his books before trusting
-# Weights are starting points. Tune them as you study and track outcomes.
-# Books owned: Solar Returns; Transits and Solar Returns; Lunar Returns.
+# Aimed solar return scoring rules (Ciro Discepolo method), version 2.
+# Every rule has: status core (stated in the book, with the page) or confirm (a weight the book
+# does not give in numbers, or a rule from the owner still to be checked against the Great Treatise).
+# Book: Transits and Solar Returns (AFA). "TR n" = Thirty Rules (ch. 1, pp. 1-7). "SRG n" = Solar Return
+# Guidelines (Appendix II, pp. 217-219). "p. n" = printed book page. Owner decisions are dated.
+# Nothing astrological is hardcoded: the finder reads this file.
 
-# The finder always weighs four charts. How each one changes the score is
-# decided with the owner in Phase 5; until then these are display-only.
+version: 2
+house_system: placidus
+
+cusp_orb_degrees: 2.5        # TR/owner 27 Oct 2026 and SRG 23: a planet within 2.5 deg of a cusp works in BOTH
+                             # houses; for penalties and hard filters the worse house counts, bonuses use the primary.
+angular_orb_degrees: 12      # owner 27 Oct 2026: a planet within 12 deg of an SR angle is dominant.
+bonus_full_orb_degrees: 5    # bonuses are full inside 5 deg of the angle (SRG 24 reasons with 5 deg) ... (confirm)
+bonus_half_orb_degrees: 12   # ... and fall to half at 12 deg (confirm)
+stellium_min_bodies: 3       # three or more of the ten planets in one SR house (SRG 3 counts Jupiter, Venus, Mercury)
+stellium_bodies: [sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto]
+
+# How the four context charts enter the score. Transits modulate; the previous and base SR are shown, not scored.
 context_charts:
   natal:
-    use: SR Ascendant's natal house, natal intercepted signs
+    use: the natal house of the SR Ascendant (table below), natal cusps for the 2.5 deg safety rule
     status: core
   year_transits:
-    use: heavy transits (Saturn, Uranus, Neptune, Pluto, Mars stations) to
-         natal points birthday to birthday; avoid SR placements that repeat
-         the same pressure, favor ones that support the stressed area
-    weight: 0          # display-only until confirmed
-    status: confirm
+    use: >
+      TR 14 cancels the natal-tenth bonus; TR 16 names the transit in a 1/6/12 disqualification;
+      SRG 11 penalises Jupiter in SR 2/8 when Saturn transits natal 2/8. No positive points (TR 13, TR 25, SRG 5).
+    status: core
+    orbs: {sun: 5, moon: 5, venus: 5, mars: 5, mercury: 5, jupiter: 3, saturn: 3, uranus: 2, neptune: 2, pluto: 1}   # TR 23
+    dissonant_aspects: [conjunction, square, opposition, semisquare, sesquiquadrate]                               # TR 12
+    heavy_bodies: [saturn, uranus, neptune, pluto]
+    natal_targets: [sun, moon, asc, mc]
   previous_sr:
-    use: what the current year set up; compare houses emphasized
+    use: shown beside the result; no rule in Transits and Solar Returns
     weight: 0
-    status: confirm
+    status: confirm (Great Treatise ch. 12 missing)
   base_sr:
-    use: the chart if the native stays home; every result reports what it
-         fixes or worsens versus this one
+    use: >
+      every result reports what it fixes or worsens versus staying home; marked "marginal" when the base has
+      no hard problem and the gain is under marginal_gain_points (SRG 19, SRG 21: protection first)
+    marginal_gain_points: 20
     weight: 0
-    status: confirm
+    status: core
 
-house_system: placidus
-cusp_orb_degrees: 2.5        # Rule 1 (Thirty Rules): a planet within 2.5 deg before or after a cusp works in BOTH houses,
-                             # in aimed solar and lunar returns, transits and the radix. Owner, 27 Oct 2026.
-angular_orb_degrees: 12      # a planet within 12 deg of an SR angle (ASC, MC, DSC, IC) is dominant; owner, 27 Oct 2026
-star_rating:
-  # raw score thresholds for 1 to 5 stars (tune after testing)
-  thresholds: [-60, -20, 10, 40, 70]
-
-hard_filters:
+# ---------------------------------------------------------------------------------------------
+hard_filters:                # any one of these disqualifies the place; the reason is printed
   - id: sr_asc_in_natal_1_6_12
-    description: SR Ascendant falls in natal 1st, 6th or 12th house
+    description: SR Ascendant in natal 1st, 6th or 12th house (TR 4; SRG 2; ch. 12 pp. 159, 161, 163)
     houses: [1, 6, 12]
+    status: core
+  - id: sun_in_sr_1_6_12
+    description: SR Sun in SR 1st, 6th or 12th house (TR 4; SRG 2)
+    body: sun
+    houses: [1, 6, 12]
+    status: core
+  - id: mars_in_sr_1_6_12
+    description: SR Mars in SR 1st, 6th or 12th house, "enough to spoil a year" (TR 5; TR 30; pp. 171-174)
+    body: mars
+    houses: [1, 6, 12]
+    status: core
+  - id: stellium_in_sr_1_6_12
+    description: >
+      Three or more planets in SR 1st, 6th or 12th, or spanning the 12th and 1st, even Jupiter, Venus and Mercury
+      (TR 4; SRG 3; owner 27 Oct 2026: read as an Ascendant in the 12th)
+    houses: [1, 6, 12]
+    span_pairs: [[12, 1]]
+    status: core
+  - id: stellium_in_sr_8
+    description: A stellium in the SR 8th house, "could indicate serious difficulties" (SRG 9; owner 27 Oct 2026)
+    houses: [8]
     status: core
   - id: mars_saturn_same_house
     description: >
-      Mars and Saturn in the same house of a solar or lunar return, whatever the house,
-      except the 3rd and the 9th. (Thirty Rules; owner, 27 Oct 2026.)
+      Mars and Saturn in the same house of a solar or lunar return, except the 3rd and the 9th
+      (owner 27 Oct 2026, from the Thirty Rules as taught; not in the AFA text: confirm)
     bodies: [mars, saturn]
     allowed_houses: [3, 9]
-    status: core
-  - id: stellium_1_12_reads_as_asc_in_12
-    description: >
-      A stellium between the 1st and the 12th houses, even of positive planets such as
-      Jupiter, Venus and Mercury, is read exactly as an Ascendant in the 12th house.
-      (Thirty Rules; owner, 27 Oct 2026.)
-    houses: [1, 12]
-    min_bodies: 3
-    read_as: asc_in_12
-    status: core
-  - id: stellium_8_reads_as_asc_in_12
-    description: >
-      A stellium in the 8th house, even of positive planets, is read exactly as an
-      Ascendant in the 12th house. (Thirty Rules; owner, 27 Oct 2026.)
-    houses: [8]
-    min_bodies: 3
-    read_as: asc_in_12
+    status: confirm
+  - id: sr_asc_near_natal_cusp
+    description: "SR Ascendant closer than 2.5 deg to any natal cusp: unsafe against birth-time error (SRG 7)"
+    min_degrees: 2.5
+    can_disable: true
     status: core
 
-penalties:
-  - id: malefics_in_sr_1_6_12
-    description: Sun, Moon, Mars, Saturn, Uranus, Neptune, Pluto in SR houses 1, 6 or 12
-    bodies: [sun, moon, mars, saturn, uranus, neptune, pluto]
-    houses: {12: -60, 1: -45, 6: -40}
-    status: core (confirm planet list and weights)
-  - id: stellium_in_sr_1_6_12
-    description: Three or more bodies in SR house 1, 6 or 12
-    min_bodies: 3
-    houses: [1, 6, 12]
-    weight: -60
-    status: core
-  - id: malefics_in_sr_7_8
-    description: Mars, Saturn or outer planets in SR 7th or 8th
-    bodies: [mars, saturn, uranus, neptune, pluto]
-    houses: [7, 8]
-    weight: -20
-    status: confirm
+# ---------------------------------------------------------------------------------------------
+sr_asc_natal_house:          # points by the natal house the SR Ascendant falls in (ch. 12 pp. 159-163)
+  1: hard
+  2: {weight: -15, text: "money circulates, mostly out; beware theft and fraud (p. 159-160)", status: confirm}
+  3: {weight: 0, text: "vehicle, quick trips, studies; driving accident risk (p. 160)", status: core}
+  4: {weight: 0, text: "real estate, parents, possible relocation (p. 160)", status: core}
+  5: {weight: 0, text: "a romance begins or ends; children in focus (p. 160-161)", status: core, goals: {love: 15}}
+  6: hard
+  7: {weight: -15, text: "hostility, legal matters, separation; or marriage (p. 161; TR 7)", status: confirm}
+  8: {weight: -30, text: "money drain; acceptable only if no other solution (p. 161-162; SRG 9)", status: confirm}
+  9: {weight: 5, text: "journeys, higher studies; careful driving (p. 162)", status: confirm}
+  10: {weight: 30, text: "awards, promotion, freedom from the past; virtually without exception positive (TR 13; p. 162)", status: core,
+       cautions: ["SRG 6: avoid unless experienced; Jupiter, Venus or the Sun on the SR MC is the safer choice",
+                  "TR 14: cancelled by a dissonant Saturn, Uranus, Neptune or Pluto transit to natal MC, ASC, Sun or Moon this year"]}
+  11: {weight: -15, text: "bereavement often; or friends and support (TR 10; p. 163; SRG 16)", status: confirm}
+  12: hard
 
-bonuses:
-  - id: sr_asc_in_natal_10
-    description: SR Ascendant in natal 10th house
-    weight: 30
-    goals: [career]
-    status: core
-  - id: benefics_angular
-    description: Jupiter or Venus within orb of an SR angle, strongest at MC
-    bodies: [jupiter, venus]
-    angle_orb_degrees: 12      # owner: dominance within 12 deg of an angle
-    weights: {mc: 30, asc: 25, dsc: 20, ic: 20}
-    status: core
-  - id: sun_in_sr_10_11
-    description: Sun in SR 10th or 11th house
-    houses: [10, 11]
-    weight: 25
+sun_sr_house:                # the SR Sun's own house (ch. 12 reads Sun, stellium and Ascendant alike)
+  1: hard
+  2: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  3: {weight: 0, status: core}
+  4: {weight: 0, status: core}
+  5: {weight: 10, text: "romance, children, fun (p. 160)", status: confirm, goals: {love: 20}}
+  6: hard
+  7: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  8: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  9: {weight: 10, text: "journeys, higher knowledge (p. 162)", status: confirm}
+  10: {weight: 25, text: "awards and achievements (p. 162)", status: confirm}
+  11: {weight: -10, text: "the 11th often means bereavement (TR 10)", status: confirm}
+  12: hard
+
+planet_sr_house:             # weights per planet and SR house (ch. 13). hard = disqualify. missing house = 0.
+  moon:                      # "the position of the Moon in the Solar Return chart is minor" (p. 165)
+    1: -5
+    6: -5
+    12: -5
     status: confirm
-  - id: cusp_frees_intercepted_sign
-    description: An SR Placidus cusp falls in a sign intercepted in the natal chart
-    weight: 5
-    status: core (from his intercepted sign teaching)
+  mars:                      # pp. 171-174; "Mars can be much more difficult than Saturn, Neptune or Pluto"
+    1: hard
+    2: {weight: -20, text: "excessive expenses, theft, fraud (p. 172)"}
+    3: {weight: -15, text: "vehicle accidents, exam failure, quarrels (p. 172)"}
+    4: {weight: -5, text: "remodeling; one of the better positions, but fire, theft, quarrels with parents (p. 172)"}
+    5: {weight: -10, text: "turbulence in love, disputes with children (p. 172-173)"}
+    6: hard
+    7: {weight: -30, text: "quarrels with a partner, parting, legal trouble, assault (p. 173)"}
+    8: {weight: -25, text: "money drain: theft, fraud, bad loans, taxes (p. 173)"}
+    9: {weight: -15, text: "accidents on journeys, falls, broken bones (p. 173-174)"}
+    10: {weight: -10, text: "equally positive and negative: effort, or troubles at work (p. 174)"}
+    11: {weight: -10, text: "quarrels with friends, loss of a supporter (p. 174)"}
+    12: hard
+    status: confirm (houses from the book, weights mine)
+  saturn:                    # pp. 177-180; "less malefic than Mars"; 1/6/12 "wise to avoid" (SRG 15)
+    1: {weight: -25, text: "melancholy, isolation; worse near the Ascendant; never beyond sadness (p. 177-178)"}
+    2: {weight: -20, text: "financial contraction, expenses, taxes, debts (p. 178)"}
+    3: {weight: -10, text: "trouble with siblings, education paused, commuting (p. 178)"}
+    4: {weight: -10, text: "parents' trouble, home expenses, oppressive atmosphere (p. 178)"}
+    5: {weight: -10, text: "fewer joys, trouble for children, separation (p. 178-179)"}
+    6: {weight: -25, text: "a chronic physical problem, workplace difficulties (p. 179)"}
+    7: {weight: -15, text: "relationship troubles, often temporary; legal issues (p. 179)"}
+    8: {weight: -25, text: "difficult finances get worse; taxes, inheritance fights (p. 179)"}
+    9: {weight: -15, text: "avoid travel; delays, bad news from far away (p. 179-180)"}
+    10: {weight: -25, text: "career setback, job loss, resignation (p. 180)"}
+    11: {weight: -15, text: "loss of a friend or supporter; hostility (p. 180)"}
+    12: {weight: -25, text: "nuisances in any area, seclusion; worse near the Ascendant (p. 180)"}
+    status: confirm (houses from the book, weights mine)
+  jupiter:                   # pp. 174-177; "where you find your main resources"; 2/7/8 bistable (TR 8)
+    1: {weight: 10, text: "recovery, comeback; watch weight and swindles (p. 174-175)"}
+    2: {weight: 0, text: "money circulates both ways; loss when 12/1/6 involved (p. 175; TR 8)"}
+    3: {weight: 10, text: "vehicle, trips, good news, exams (p. 175)"}
+    4: {weight: 15, text: "advantages from real estate, parents better off (p. 175)"}
+    5: {weight: 15, text: "new love, fun, children's good news; rarely negative (p. 175-176)"}
+    6: {weight: 15, text: "protection of health, better work conditions (p. 176)"}
+    7: {weight: 5, text: "helps love and legal matters, but can also bring quarrels (p. 176; TR 8)"}
+    8: {weight: 0, text: "increased flow of money, income or drain (p. 176; TR 8)"}
+    9: {weight: 15, text: "travel and benefits from abroad, studies (p. 176)"}
+    10: {weight: 20, text: "professional growth, almost always irreversible (p. 177)"}
+    11: {weight: 15, text: "friends in high places, support, projects (p. 177)"}
+    12: {weight: 25, text: "perhaps Jupiter's best position: the guardian angel (p. 177)"}
+    status: confirm (houses from the book, weights mine)
+  venus:                     # pp. 169-171; "usually provides help and protects"
+    1: {weight: 10, text: "health protection, diminishes malefics (p. 169)"}
+    2: {weight: 10, text: "a little extra money, creditors negotiate (p. 169)"}
+    3: {weight: 5, text: "pleasant trips, good press (p. 169)"}
+    4: {weight: 5, text: "home enjoyed, real estate advantages (p. 170)"}
+    5: {weight: 10, text: "love, fun, children (p. 170)", goals: {love: 20}}
+    6: {weight: 10, text: "a helping hand for health; seldom negative (p. 170)"}
+    7: {weight: 10, text: "favors marriage, reconciliation, lawsuits end well (p. 170)", goals: {love: 20}}
+    8: {weight: 5, text: "money through partner, gifts, loans granted (p. 170)"}
+    9: {weight: 5, text: "pleasant journeys, romance abroad (p. 171)"}
+    10: {weight: 15, text: "promotion, praise, financial benefits (p. 171)", goals: {career: 20}}
+    11: {weight: 10, text: "new friends, support of influential people (p. 171)"}
+    12: {weight: 10, text: "acts like Jupiter at a lower level: helps overcome hindrances (p. 171)"}
+    status: confirm (houses from the book, weights mine)
+  uranus:                    # pp. 180-183; "seldom detrimental"; 1/6/12 wise to avoid (SRG 15)
+    1: {weight: -10, text: "anxiety, tension, insomnia (p. 181)"}
+    2: {weight: -5, text: "big earnings or big spending (p. 181)"}
+    4: {weight: -5, text: "sudden change of home; electrical and weather damage (p. 181)"}
+    6: {weight: -20, text: "changes at work; anxiety (p. 182)"}
+    7: {weight: -10, text: "change in a relationship, sudden legal issues (p. 182)"}
+    8: {weight: -15, text: "dramatic loss of money, or unexpected income (p. 182)"}
+    10: {weight: 5, text: "career turning point, new opportunities (p. 182-183)"}
+    11: {weight: -5, text: "loss of someone close, friendships change (p. 183)"}
+    12: {weight: -20, text: "an unforeseen hindrance; less than Mars (p. 183)"}
+    status: confirm (houses from the book, weights mine)
+  neptune:                   # pp. 183-185; "where your anguish and fears occur"
+    1: {weight: -20, text: "restlessness, confusion (p. 183)"}
+    2: {weight: -10, text: "concern for money, fraud (p. 183)"}
+    6: {weight: -20, text: "unrealistic fears, workplace undermining (p. 184)"}
+    7: {weight: -10, text: "concern for marriage, betrayal, legal issues (p. 184)"}
+    8: {weight: -10, text: "apprehension about money (p. 184-185)"}
+    10: {weight: -10, text: "job concerns, downsizing (p. 185)"}
+    11: {weight: -5, text: "a friend in trouble, loss of support (p. 185)"}
+    12: {weight: -20, text: "anguish; avoid the sea; hospitalization possible (p. 185)"}
+    status: confirm (houses from the book, weights mine)
+  pluto:                     # pp. 185-187; "does not represent a dangerous or hostile element"
+    1: {weight: -15, text: "willpower, arrogance; worse with SR Ascendant in natal 1st (p. 185-186)"}
+    2: {weight: -5, text: "grandiose aims, expenses increase (p. 186)"}
+    6: {weight: -15, text: "health problems, but less than Mars (p. 186)"}
+    7: {weight: -10, text: "marriage or separation, important lawsuit (p. 187)"}
+    8: {weight: -10, text: "crisis for a loved one; money lost or won (p. 187)"}
+    10: {weight: 5, text: "an important job opportunity or a turning point (p. 187)"}
+    12: {weight: -15, text: "trouble not a given; self-destructive impulses (p. 187)"}
+    status: confirm (houses from the book, weights mine)
+
+angular_bonuses:             # within angular_orb_degrees, full inside bonus_full_orb_degrees, half at the edge
+  jupiter: {mc: 30, asc: 20, dsc: 15, ic: 15, text: "Jupiter conjunct the Midheaven is the best possible influence (p. 177)", status: core (MC), confirm (others)}
+  venus:   {mc: 20, asc: 15, dsc: 15, ic: 10, text: "Venus on an angle protects the area (pp. 169-171; SRG 6)", status: confirm}
+  sun:     {mc: 15, text: "the Sun on the SR MC, the safer choice to the natal tenth (SRG 6)", status: confirm}
 
 overrides:
-  - id: saturn_dominates_mc
-    description: Saturn near the SR MC cancels any benefic bonus at the MC
-    saturn_mc_orb_degrees: 12  # owner: dominance within 12 deg of an angle
-    status: core (Solar Returns book)
+  - id: saturn_dominates_angle
+    description: >
+      "Saturn always wins over Jupiter, Venus, the Sun" (SRG 24): Saturn within the angular orb of an angle,
+      even from the neighbouring house, cancels every benefic bonus on that angle.
+    orb_degrees: 12
+    angles: [mc, asc, dsc, ic]
+    status: core (MC, book uses 5 deg), confirm (other angles, 12 deg)
+  - id: heavy_transit_cancels_natal_10th
+    description: >
+      TR 14: the SR Ascendant in the natal 10th with a dissonant transit of Saturn, Uranus, Neptune or Pluto to the
+      natal MC, 10th house, Ascendant, Sun or Moon that year means trouble: the +30 is cancelled.
+    status: core
+  - id: saturn_transit_2_8_penalises_jupiter_2_8
+    description: >
+      SRG 11 and p. 175: with Saturn transiting the natal 2nd or 8th house during the year, Jupiter in SR 2nd or 8th
+      means an outflow of money.
+    weight: -15
+    status: core (rule), confirm (weight)
 
-goal_profiles:
-  # multipliers applied to bonus weights per goal for the year
-  career:      {sr_asc_in_natal_10: 1.0, benefics_angular: 1.2, sun_in_sr_10_11: 1.2}
-  love:        {benefics_angular: 1.2}
-  rest:        {sr_asc_in_natal_10: 0.0}
-  money:       {benefics_angular: 1.1}
-  inner_work:  {sr_asc_in_natal_10: 0.0}
+goal_profiles:               # multipliers on bonus weights and extra points named per rule above
+  career:     {sr_asc_natal_house.10: 1.0, angular_bonuses: 1.2, sun_sr_house.10: 1.2}
+  love:       {angular_bonuses: 1.2}
+  rest:       {sr_asc_natal_house.10: 0.0, angular_bonuses: 1.0}       # protection first (SRG 21)
+  money:      {angular_bonuses: 1.1}
+  inner_work: {sr_asc_natal_house.10: 0.0}
 
-finder_defaults:
+robustness:
+  asc_min_cusp_distance_degrees: 2.5     # SRG 7 (also the hard filter above)
+  birth_time_shifts_minutes: [-45, -30]  # SRG 7: recompute as if born 30 to 45 minutes earlier ...
+  use_subject_uncertainty: true          # ... and with +/- the chart's own time confidence
+  flip_costs_stars: 1
+
+star_rating:
+  thresholds: [-60, -20, 10, 40, 70]     # placeholders; tune after real scores (owner F18)
+
+city_search_defaults:
   population_floor: 100000
-  max_airport_distance_km: 100
-  airport_types: [large_airport]
-  require_scheduled_service: true
-  grid_step_degrees: 1.0
-  refine_step_degrees: 0.25
-  latitude_range: [-60, 66]
+  airport_max_km: 150                    # SRG 13: an airport with regular service
+  exclude_countries: []

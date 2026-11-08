@@ -245,6 +245,7 @@ export default function App() {
         {view === 'returns' && natal && (
           <ReturnsView subject={subject} natalInput={!subject ? { datetime_local: isoLocal(wallClock(dateFromJd(natal.jd), natal.place.timezone)), lat: natal.place.lat, lon: natal.place.lon, timezone: natal.place.timezone, utc_offset_override: null } : null}
             natalPlace={{ lat: natal.place.lat, lon: natal.place.lon, name: natal.place.name }} settings={settings} defaultYear={finderJump?.year ?? defaultYear} natalWheelData={natalWheel} initialPlace={finderJump ? { lat: finderJump.lat, lon: finderJump.lon, name: finderJump.name } : null}
+            ownerName={subject ? (subject.kind === 'person' ? subject.name : people.find((x) => x.id === subject.owner_id)?.name ?? null) : null}
             onJump={(j, pl) => { setLive(false); setLocked(true); setPlace({ lat: pl.lat, lon: pl.lon, name: pl.name, timezone: null }); setJd(j); setView('wheel') }}
             onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} />
         )}

@@ -18,6 +18,7 @@ interface Props {
   defaultYear: number
   natalWheelData: ReturnType<typeof wheelFromChart> | null
   initialPlace?: Place | null
+  ownerName?: string | null
   onJump: (jd: number, place: Place) => void
   onSaved: (s: Subject) => void
 }
@@ -77,7 +78,8 @@ export function ReturnsView(p: Props) {
 
   const saveAsChart = useCallback(async () => {
     if (!shown) return
-    const name = `${p.subject?.name ?? 'Chart'} ${kind === 'solar' ? 'SR' : 'LR'} ${shown.year}${shown.place.name ? ` ${shown.place.name}` : ''}`
+    const who = p.ownerName ?? (p.subject?.kind === 'person' ? p.subject.name : null)
+    const name = `${who ? `${who} ` : ''}${kind === 'solar' ? 'SR' : 'LR'} ${shown.year}${shown.place.name ? ` ${shown.place.name.split(',')[0]}` : ''}`
     const s: SubjectIn = {
       name, kind: 'event', tags: [kind === 'solar' ? 'solar-return' : 'lunar-return'], notes: '',
       datetime_local: shown.local_datetime.slice(0, 16) + ':00', time_confidence: 'exact', place_name: shown.place.name,

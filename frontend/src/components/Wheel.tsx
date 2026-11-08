@@ -40,6 +40,11 @@ const NATAL_LABELS: Record<string, string> = { asc: 'AC', dsc: 'DC', mc: 'MC', i
 export function Wheel({ data, transits, highlight, onSelect }: Props) {
   const asc = data.asc
   const toXY = (lon: number, r: number) => pointOnWheel(lon, r, asc, C)
+  // Natal wheel: cusp degrees sit just outside the sign ring and angle labels beyond them.
+  // Bi-wheel: the transit ring takes that space, so cusp degrees move inside and the house numbers inward.
+  const rCuspDeg = transits ? R_SIGN_IN - 10 : R_OUTER + 10
+  const rHouseNum = transits ? 234 : R_HOUSE_NUM
+  const rAngleLabel = transits ? R_T_OUT + 14 : R_OUTER + 27
   const svgRef = useRef<SVGSVGElement>(null)
   const [drag, setDrag] = useState<{ body: string; lon: number } | null>(null)
 
@@ -79,8 +84,8 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
     const b = toXY(lon, R_ASPECT)
     const next = data.cusps[(i + 1) % 12]
     const midLon = lon + ((next - lon + 360) % 360) / 2
-    const n = toXY(midLon, R_HOUSE_NUM)
-    const dl = toXY(lon, R_SIGN_IN + 11)
+    const n = toXY(midLon, rHouseNum)
+    const dl = toXY(lon, rCuspDeg)
     let rot = -(180 + (lon - asc)) + 90 // tangent to the ring
     rot = ((rot % 360) + 360) % 360
     if (rot > 90 && rot < 270) rot -= 180 // never upside down
@@ -96,7 +101,7 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
   const angleLabels = [
     { lon: data.asc, text: 'AC' }, { lon: data.mc, text: 'MC' }, { lon: norm(data.asc + 180), text: 'DC' }, { lon: norm(data.mc + 180), text: 'IC' },
   ].map(({ lon, text }) => {
-    const p = toXY(lon, transits ? R_T_OUT + 12 : R_OUTER + 14)
+    const p = toXY(lon, rAngleLabel)
     return <text key={text} x={p.x} y={p.y} className="angle-label" textAnchor="middle" dominantBaseline="middle">{text}</text>
   })
 
@@ -205,7 +210,8 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
     )
   })() : null
 
-  const vb = transits ? `-${R_T_OUT - C + 16} -${R_T_OUT - C + 16} ${2 * R_T_OUT + 32} ${2 * R_T_OUT + 32}` : `0 0 ${SIZE} ${SIZE}`
+  const pad = transits ? R_T_OUT - C + 30 : 36
+  const vb = `-${pad} -${pad} ${SIZE + 2 * pad} ${SIZE + 2 * pad}`
 
   return (
     <svg ref={svgRef} viewBox={vb} className={`wheel${transits ? ' biwheel' : ''}`} role="img" aria-label="Chart wheel"

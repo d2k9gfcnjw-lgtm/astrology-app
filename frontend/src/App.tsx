@@ -134,6 +134,7 @@ export default function App() {
   const openSubject = useCallback(async (s: Subject) => {
     try {
       const c = await api.subjectChart(s.id)
+      setLive(false)
       const pl: Place = { lat: s.lat, lon: s.lon, name: s.place_name, timezone: c.moment.timezone }
       setSubject(s)
       setNatal({ jd: c.moment.jd_ut, place: pl, flags: c.moment.flags })
@@ -150,6 +151,7 @@ export default function App() {
   const preview = useCallback(async (s: SubjectIn) => {
     try {
       const c = await api.chart({ datetime_local: s.datetime_local, lat: s.lat, lon: s.lon, timezone: s.timezone, utc_offset_override: s.utc_offset_override }, settings)
+      setLive(false)
       const pl: Place = { lat: s.lat, lon: s.lon, name: s.place_name, timezone: c.moment.timezone }
       setSubject(null)
       setNatal({ jd: c.moment.jd_ut, place: pl, flags: c.moment.flags })
@@ -240,12 +242,12 @@ export default function App() {
         {view === 'returns' && natal && (
           <ReturnsView subject={subject} natalInput={!subject ? { datetime_local: isoLocal(wallClock(dateFromJd(natal.jd), natal.place.timezone)), lat: natal.place.lat, lon: natal.place.lon, timezone: natal.place.timezone, utc_offset_override: null } : null}
             natalPlace={{ lat: natal.place.lat, lon: natal.place.lon, name: natal.place.name }} settings={settings} defaultYear={finderJump?.year ?? defaultYear} natalWheelData={natalWheel} initialPlace={finderJump ? { lat: finderJump.lat, lon: finderJump.lon, name: finderJump.name } : null}
-            onJump={(j, pl) => { setLocked(true); setPlace({ lat: pl.lat, lon: pl.lon, name: pl.name, timezone: null }); setJd(j); setView('wheel') }}
+            onJump={(j, pl) => { setLive(false); setLocked(true); setPlace({ lat: pl.lat, lon: pl.lon, name: pl.name, timezone: null }); setJd(j); setView('wheel') }}
             onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} />
         )}
         {view === 'finder' && <FinderView subject={subject} defaultYear={defaultYear} result={finderResult} onResult={setFinderResult} land={land} onOpenReturn={(y, lat, lon, name) => { setFinderJump({ year: y, lat, lon, name }); setView('returns') }} />}
         {view === 'map' && natal && <AcgView subject={subject} natalJd={natal.jd} clockJd={jd} settings={settings} defaultYear={defaultYear} finderResult={finderResult} landGeoJson={land}
-          onOpenPlace={(j, lat, lon, name) => { setLocked(true); setPlace({ lat, lon, name, timezone: null }); setJd(j); setView('wheel') }} />}
+          onOpenPlace={(j, lat, lon, name) => { setLive(false); setLocked(true); setPlace({ lat, lon, name, timezone: null }); setJd(j); setView('wheel') }} />}
         {chart && view === 'table' && <TableView chart={chart} highlight={highlight} onSelect={setHighlight} />}
         {chart && view !== 'year' && view !== 'returns' && view !== 'finder' && view !== 'map' && (
           <div className="provenance">

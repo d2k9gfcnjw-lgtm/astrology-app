@@ -1,4 +1,4 @@
-import type { Chart, City, FinderRequest, FinderResult, Keyframe, LunarInstant, ResolvedTime, ReturnChart, ReturnSet, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
+import type { AcgAt, AcgLines, AcgSettings, Chart, City, FinderRequest, FinderResult, Keyframe, LunarInstant, ResolvedTime, ReturnChart, ReturnSet, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -60,6 +60,8 @@ export const api = {
     if (place) { p.set('lat', String(place.lat)); p.set('lon', String(place.lon)); p.set('place_name', place.name) }
     return call<ReturnChart>('GET', `/api/subjects/${id}/lunar-return?${p}`)
   },
+  acgLines: (jd_ut: number, settings: Settings, acg: AcgSettings) => call<AcgLines>('POST', '/api/acg/lines', { jd_ut, settings, acg }),
+  acgAt: (jd_ut: number, lat: number, lon: number, settings: Settings, acg: AcgSettings) => call<AcgAt>('POST', '/api/acg/at', { jd_ut, lat, lon, settings, acg }),
   finderRun: (req: FinderRequest) => call<FinderResult>('POST', '/api/finder/run', req),
   yearAhead: (id: string, year: number) => call<YearAhead>('GET', `/api/subjects/${id}/year-ahead?year=${year}`),
   yearAheadUnsaved: (subject: { datetime_local: string; lat: number; lon: number; timezone: string | null; utc_offset_override: string | null }, year: number, settings: Settings) =>

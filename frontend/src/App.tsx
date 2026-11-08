@@ -8,6 +8,9 @@ import { Wheel, type TransitRing } from './components/Wheel'
 import { YearAheadView } from './components/YearAheadView'
 import { ReturnsView } from './components/ReturnsView'
 import { FinderView } from './components/FinderView'
+import { AcgView } from './components/AcgView'
+import type { FinderResult } from './lib/types'
+import type { FeatureCollection } from 'geojson'
 import { transitAspects } from './lib/transitAspects'
 import type { SolveHit } from './lib/types'
 import { TableView } from './components/TableView'
@@ -31,9 +34,12 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [chart, setChart] = useState<Chart | null>(null)
   const [frame, setFrame] = useState<Keyframe | null>(null)
-  const [view, setView] = useState<'wheel' | 'transits' | 'year' | 'returns' | 'finder' | 'table'>('wheel')
+  const [view, setView] = useState<'wheel' | 'transits' | 'year' | 'returns' | 'finder' | 'map' | 'table'>('wheel')
   const [natalChart, setNatalChart] = useState<Chart | null>(null)
   const [finderJump, setFinderJump] = useState<{ year: number; lat: number; lon: number; name: string } | null>(null)
+  const [finderResult, setFinderResult] = useState<FinderResult | null>(null)
+  const [land, setLand] = useState<FeatureCollection | null>(null)
+  useEffect(() => { fetch('/api/finder/land').then((r) => r.json()).then(setLand).catch(() => setLand(null)) }, [])
   const [solveMenu, setSolveMenu] = useState<{ body: string; lon: number; hits: SolveHit[]; chosen: number } | null>(null)
   const [panel, setPanel] = useState<Panel>('library')
   const [editing, setEditing] = useState<Subject | null>(null)
@@ -178,6 +184,7 @@ export default function App() {
           <button className={view === 'year' ? 'active' : ''} onClick={() => setView('year')} disabled={!natal}>Year ahead</button>
           <button className={view === 'returns' ? 'active' : ''} onClick={() => setView('returns')} disabled={!natal}>Returns</button>
           <button className={view === 'finder' ? 'active' : ''} onClick={() => setView('finder')} disabled={!subject}>Finder</button>
+          <button className={view === 'map' ? 'active' : ''} onClick={() => setView('map')} disabled={!natal}>Map</button>
           <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')}>Table</button>
           <button onClick={() => { setPanel('settings'); setSidebarOpen(true) }}>Settings</button>
         </div>
@@ -214,9 +221,11 @@ export default function App() {
             onJump={(j, pl) => { setLocked(true); setPlace({ lat: pl.lat, lon: pl.lon, name: pl.name, timezone: null }); setJd(j); setView('wheel') }}
             onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} />
         )}
-        {view === 'finder' && <FinderView subject={subject} defaultYear={defaultYear} onOpenReturn={(y, lat, lon, name) => { setFinderJump({ year: y, lat, lon, name }); setView('returns') }} />}
+        {view === 'finder' && <FinderView subject={subject} defaultYear={defaultYear} result={finderResult} onResult={setFinderResult} land={land} onOpenReturn={(y, lat, lon, name) => { setFinderJump({ year: y, lat, lon, name }); setView('returns') }} />}
+        {view === 'map' && natal && <AcgView subject={subject} natalJd={natal.jd} clockJd={jd} settings={settings} defaultYear={defaultYear} finderResult={finderResult} landGeoJson={land}
+          onOpenPlace={(j, lat, lon, name) => { setLocked(true); setPlace({ lat, lon, name, timezone: null }); setJd(j); setView('wheel') }} />}
         {chart && view === 'table' && <TableView chart={chart} highlight={highlight} onSelect={setHighlight} />}
-        {chart && view !== 'year' && view !== 'returns' && view !== 'finder' && (
+        {chart && view !== 'year' && view !== 'returns' && view !== 'finder' && view !== 'map' && (
           <div className="provenance">
             {chart.provenance.house_system} · {chart.provenance.zodiac}{chart.provenance.ayanamsa ? ` (${chart.provenance.ayanamsa})` : ''} · {chart.provenance.node_type} node · {chart.is_day ? 'day' : 'night'} chart
             {natal && natal.flags.length > 0 && <span className="flag"> · natal offset flags: {natal.flags.join(', ')}</span>}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { api } from '../lib/api'
 import { BODY_NAMES } from '../lib/angles'
 import type { CityResult, FinderResult, PlaceScore, Subject } from '../lib/types'
@@ -40,9 +40,9 @@ function ScoreCard({ p, title }: { p: PlaceScore; title: string }) {
   )
 }
 
-interface Props { subject: Subject | null; defaultYear: number; onOpenReturn: (year: number, lat: number, lon: number, name: string) => void }
+interface Props { subject: Subject | null; defaultYear: number; result: FinderResult | null; onResult: (r: FinderResult | null) => void; land: FeatureCollection | null; onOpenReturn: (year: number, lat: number, lon: number, name: string) => void }
 
-export function FinderView({ subject, defaultYear, onOpenReturn }: Props) {
+export function FinderView({ subject, defaultYear, result, onResult, land, onOpenReturn }: Props) {
   const [year, setYear] = useState(defaultYear + 1)
   const [goal, setGoal] = useState('')
   const [floor, setFloor] = useState(15000)
@@ -52,13 +52,10 @@ export function FinderView({ subject, defaultYear, onOpenReturn }: Props) {
   const [safety, setSafety] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-  const [result, setResult] = useState<FinderResult | null>(null)
   const [selected, setSelected] = useState<CityResult | null>(null)
   const [tierFilter, setTierFilter] = useState<string>('all')
-  const [land, setLand] = useState<FeatureCollection | null>(null)
   const [query, setQuery] = useState('')
 
-  useEffect(() => { fetch('/api/finder/land').then((r) => r.json()).then(setLand).catch(() => setLand(null)) }, [])
 
   const run = useCallback(async () => {
     if (!subject) return
@@ -66,9 +63,9 @@ export function FinderView({ subject, defaultYear, onOpenReturn }: Props) {
     try {
       const r = await api.finderRun({ subject_id: subject.id, year, goal: goal || null, population_floor: floor, airport_max_km: km,
         exclude_countries: exclude.split(',').map((x) => x.trim().toUpperCase()).filter(Boolean), precessed, safety_cusp_filter: safety, grid_step: 1 })
-      setResult(r); setSelected(null)
+      onResult(r); setSelected(null)
     } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
-  }, [subject, year, goal, floor, km, exclude, precessed, safety])
+  }, [subject, year, goal, floor, km, exclude, precessed, safety, onResult])
 
   const list = useMemo(() => {
     if (!result) return []

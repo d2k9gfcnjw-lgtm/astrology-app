@@ -375,3 +375,26 @@ export interface FinderRequest {
   safety_cusp_filter: boolean
   grid_step: number
 }
+
+export interface AcgSettings {
+  bodies: string[]
+  angles: string[]
+  method: 'mundo' | 'zodiacal'
+  orb_km: number
+  paran_orb_lat: number
+  include_parans: boolean
+}
+
+export const DEFAULT_ACG: AcgSettings = {
+  bodies: ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'],
+  angles: ['asc', 'dsc', 'mc', 'ic'],
+  method: 'mundo',
+  orb_km: 300,
+  paran_orb_lat: 1,
+  include_parans: true,
+}
+
+export interface AcgLine { body: string; angle: string; points: [number, number][][] }
+export interface Paran { body_a: string; angle_a: string; body_b: string; angle_b: string; lat: number }
+export interface AcgLines { lines: AcgLine[]; parans: Paran[] }
+export interface AcgAt { chart: Chart; lines: { body: string; angle: string; km: number; deg: number }[]; parans: Paran[]; orb_km: number }

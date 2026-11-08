@@ -21,6 +21,7 @@ from .engine.solver import PAD_SOLVE_DAYS, Track
 from .engine.transits import YearAhead, year_ahead
 from .engine.returns import ReturnChart, ReturnSet, lunar_return, lunar_return_instants, return_set
 from .engine.finder.search import FinderOptions, FinderResult, run_finder
+from .engine.acg import AcgSettings, AtPlace, Line, Paran, at_place, lines_at, parans_at
 from .storage import ChartLibrary, Subject, SubjectIn
 
 _library: ChartLibrary | None = None
@@ -467,3 +468,39 @@ def finder_land() -> dict:
         raise HTTPException(status_code=503, detail="Natural Earth land file missing: run scripts/fetch_data.py")
     sf = shapefile.Reader(str(NE_SHP))
     return {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": s.__geo_interface__} for s in sf.shapes()]}
+
+
+class AcgLinesRequest(BaseModel):
+    jd_ut: float
+    settings: Settings = Field(default_factory=Settings)
+    acg: AcgSettings = Field(default_factory=AcgSettings)
+
+
+class AcgLinesResponse(BaseModel):
+    lines: list[Line]
+    parans: list[Paran]
+
+
+@app.post("/api/acg/lines", response_model=AcgLinesResponse)
+def acg_lines(req: AcgLinesRequest):
+    try:
+        return AcgLinesResponse(lines=lines_at(req.jd_ut, req.settings, req.acg),
+                                parans=parans_at(req.jd_ut, req.settings, req.acg) if req.acg.include_parans else [])
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+class AcgAtRequest(BaseModel):
+    jd_ut: float
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    settings: Settings = Field(default_factory=Settings)
+    acg: AcgSettings = Field(default_factory=AcgSettings)
+
+
+@app.post("/api/acg/at", response_model=AtPlace)
+def acg_at(req: AcgAtRequest):
+    try:
+        return at_place(req.jd_ut, req.lat, req.lon, req.settings, req.acg)
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

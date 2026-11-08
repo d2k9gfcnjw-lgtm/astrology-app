@@ -1,0 +1,2 @@
+Noto Sans Symbols and Noto Sans Symbols 2 are licensed under the SIL Open Font License, Version 1.1.
+https://openfontlicense.org  Source: https://github.com/notofonts/symbols

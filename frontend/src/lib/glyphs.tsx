@@ -31,6 +31,20 @@ export const BODY_PATHS: Record<string, string> = {
   fortune: 'M16 10a6 6 0 1 1-12 0 6 6 0 0 1 12 0zM5.8 5.8l8.4 8.4M14.2 5.8l-8.4 8.4',
 }
 
+// Owner's choice (8 Nov 2026): style E, the Mac's Apple Symbols font. Other devices fall back to the bundled
+// Noto Sans Symbols (SIL Open Font License, frontend/public/fonts). The hand-drawn paths above stay as a fallback style.
+export const GLYPH_FONT = '"Apple Symbols", "NotoSym", "NotoSym2", "Segoe UI Symbol", sans-serif'
+export type GlyphStyle = 'font' | 'drawn'
+export let GLYPH_STYLE: GlyphStyle = 'font'
+export function setGlyphStyle(s: GlyphStyle) { GLYPH_STYLE = s }
+
+const VS = '\uFE0E' // text presentation, never emoji
+export const SIGN_CHARS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'].map((c) => c + VS)
+export const BODY_CHARS: Record<string, string> = {
+  sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇',
+  node: '☊', chiron: '⚷', lilith: '⚸', fortune: '⊗',
+}
+
 interface GlyphProps {
   d: string
   x: number
@@ -41,8 +55,16 @@ interface GlyphProps {
   title?: string
 }
 
-/** Draw a 20x20 glyph centred at (x, y) scaled to `size` px. */
-export function Glyph({ d, x, y, size, color = 'currentColor', strokeWidth = 1.7, title }: GlyphProps) {
+/** Draw a glyph centred at (x, y) at `size` px: a font character (style E) or the 20x20 drawn path. */
+export function Glyph({ d, x, y, size, color = 'currentColor', strokeWidth = 1.7, title, char }: GlyphProps & { char?: string }) {
+  if (GLYPH_STYLE === 'font' && char) {
+    return (
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontFamily={GLYPH_FONT} fontSize={size * 1.3} fill={color} stroke="none" style={{ userSelect: 'none' }}>
+        {title && <title>{title}</title>}
+        {char}
+      </text>
+    )
+  }
   const s = size / 20
   return (
     <g transform={`translate(${x - size / 2} ${y - size / 2}) scale(${s})`} fill="none" stroke={color} strokeWidth={strokeWidth / s} strokeLinecap="round" strokeLinejoin="round">

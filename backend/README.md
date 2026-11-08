@@ -39,3 +39,8 @@ per day for speeds, and `"deg min sec N|S"` for latitudes and declinations.
 - `app/engine/finder/search.py`: SR instant, 1° grid with 0.25° refinement, city scoring, birth-time robustness, tiers, versus home.
 - `POST /api/finder/run`, `GET /api/finder/land`. A world run takes about 15 seconds.
 - Calibration: `reference/case-studies/2027-expected.yaml` (local) drives `tests/test_finder_search.py::test_katias_nine_places_2027`.
+
+## Phase 6: astrocartography
+
+- `app/engine/acg.py`: lines (in mundo default, zodiacal option), parans, distance to a line, what is within orb at a place.
+- `POST /api/acg/lines`, `POST /api/acg/at`. Verified against astro.com AstroClick Travel readouts (local `golden/acg_01.yaml`); AstroClick draws the Mean Node.

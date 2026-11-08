@@ -102,7 +102,7 @@ export function AcgView(p: Props) {
     const m = map.current
     if (!m) return
     const apply = () => {
-      for (const id of ['acg-orb', 'acg-lines', 'acg-parans', 'acg-paran-labels']) if (m.getLayer(id)) m.removeLayer(id)
+      for (const id of ['acg-orb', 'acg-lines', 'acg-line-labels', 'acg-parans']) if (m.getLayer(id)) m.removeLayer(id)
       for (const id of ['acg', 'parans']) if (m.getSource(id)) m.removeSource(id)
       if (!data) return
       m.addSource('acg', { type: 'geojson', data: linesToGeoJson(data.lines) })
@@ -111,9 +111,11 @@ export function AcgView(p: Props) {
       m.addLayer({ id: 'acg-orb', type: 'line', source: 'acg', paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.18, 'line-blur': 3,
         'line-width': ['interpolate', ['exponential', 2], ['zoom'], 0, w0, 12, w0 * 4096] } })
       m.addLayer({ id: 'acg-lines', type: 'line', source: 'acg', paint: { 'line-color': ['get', 'color'], 'line-width': 1.6, 'line-dasharray': ['case', ['==', ['get', 'dashed'], 1], ['literal', [2, 2]], ['literal', [1, 0]]] } })
+      m.addLayer({ id: 'acg-line-labels', type: 'symbol', source: 'acg', layout: { 'symbol-placement': 'line', 'symbol-spacing': 600, 'text-field': ['concat', ['get', 'body'], ' ', ['upcase', ['get', 'angle']]], 'text-size': 10, 'text-font': ['Open Sans Regular'], 'text-keep-upright': true },
+        paint: { 'text-color': ['get', 'color'], 'text-halo-color': '#fff', 'text-halo-width': 1.2 } })
       if (acg.include_parans) {
-        m.addLayer({ id: 'acg-parans', type: 'line', source: 'parans', paint: { 'line-color': '#444', 'line-width': 0.8, 'line-dasharray': [1, 3], 'line-opacity': 0.7 } })
-        m.addLayer({ id: 'acg-paran-labels', type: 'symbol', source: 'parans', layout: { 'symbol-placement': 'line', 'text-field': ['get', 'label'], 'text-size': 10, 'text-font': ['Open Sans Regular'] }, paint: { 'text-color': '#333', 'text-halo-color': '#fff', 'text-halo-width': 1 } })
+        // faint lines only; the parans near the clicked place are listed in the panel
+        m.addLayer({ id: 'acg-parans', type: 'line', source: 'parans', paint: { 'line-color': '#555', 'line-width': 0.6, 'line-dasharray': [1, 4], 'line-opacity': 0.35 } }, 'acg-orb')
       }
     }
     if (m.isStyleLoaded()) apply(); else m.once('load', apply)

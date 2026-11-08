@@ -1,6 +1,6 @@
 # Phase 6 plan: astrocartography
 
-Status: waiting for owner approval.
+Status: approved and built 8 Nov 2026; verified against three AstroClick Travel readouts (56, 15, 189 km) within 0.5 km.
 
 ## What Phase 6 delivers
 

@@ -20,6 +20,7 @@ from .engine.time import FLAG_TEXT, NoTimeZoneError, resolve_moment
 from .engine.solver import PAD_SOLVE_DAYS, Track
 from .engine.transits import YearAhead, year_ahead
 from .engine.returns import ReturnChart, ReturnSet, lunar_return, lunar_return_instants, return_set
+from .engine.finder.search import FinderOptions, FinderResult, run_finder
 from .storage import ChartLibrary, Subject, SubjectIn
 
 _library: ChartLibrary | None = None
@@ -410,3 +411,59 @@ def subject_lunar_return(sid: str, jd_ut: float, lat: float | None = None, lon: 
         return lunar_return(natal, jd_ut, lat, lon, place_name)
     except EphemerisDataMissing as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+class FinderRequest(BaseModel):
+    subject_id: str
+    year: int
+    goal: str | None = None
+    population_floor: int = 15000
+    airport_max_km: float = 250
+    exclude_countries: list[str] = Field(default_factory=list)
+    precessed: bool = False
+    safety_cusp_filter: bool = True
+    grid_step: float = 1.0
+
+
+_finder_cache: dict[str, FinderResult] = {}
+
+
+@app.post("/api/finder/run", response_model=FinderResult)
+def finder_run(req: FinderRequest):
+    """The aimed solar return finder. A run takes some seconds; results are cached per inputs until the rules change."""
+    try:
+        s = library().get(req.subject_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="subject not found")
+    from .engine.rules import RULES_PATH
+    key = f"{req.subject_id}|{req.model_dump_json()}|{RULES_PATH.stat().st_mtime}|{s.updated_at}"
+    if key in _finder_cache:
+        return _finder_cache[key]
+    try:
+        natal, _ = _natal_for(s)
+        hlat, hlon, _n = _home_of(s)
+        uncertainty = {"exact": 0, "within_5_min": 5, "within_30_min": 30, "unknown": 60}.get(s.time_confidence, 0)
+        opts = FinderOptions(goal=req.goal, population_floor=req.population_floor, airport_max_km=req.airport_max_km,
+                             exclude_countries=req.exclude_countries, precessed=req.precessed, safety_cusp_filter=req.safety_cusp_filter,
+                             birth_uncertainty_minutes=uncertainty, grid_step=req.grid_step)
+        res = run_finder(natal, req.year, (hlat, hlon), opts)
+    except (NoTimeZoneError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except EphemerisDataMissing as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    _finder_cache.clear()
+    _finder_cache[key] = res
+    return res
+
+
+@app.get("/api/finder/land")
+def finder_land() -> dict:
+    """Natural Earth land polygons as GeoJSON, so the map works with no internet."""
+    import shapefile
+    from .engine.finder.geo import NE_SHP
+    if not NE_SHP.exists():
+        raise HTTPException(status_code=503, detail="Natural Earth land file missing: run scripts/fetch_data.py")
+    sf = shapefile.Reader(str(NE_SHP))
+    return {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": s.__geo_interface__} for s in sf.shapes()]}

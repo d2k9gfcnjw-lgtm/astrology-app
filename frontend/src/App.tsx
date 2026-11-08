@@ -7,6 +7,7 @@ import { useSpin } from './lib/useSpin'
 import { Wheel, type TransitRing } from './components/Wheel'
 import { YearAheadView } from './components/YearAheadView'
 import { ReturnsView } from './components/ReturnsView'
+import { FinderView } from './components/FinderView'
 import { transitAspects } from './lib/transitAspects'
 import type { SolveHit } from './lib/types'
 import { TableView } from './components/TableView'
@@ -30,8 +31,9 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [chart, setChart] = useState<Chart | null>(null)
   const [frame, setFrame] = useState<Keyframe | null>(null)
-  const [view, setView] = useState<'wheel' | 'transits' | 'year' | 'returns' | 'table'>('wheel')
+  const [view, setView] = useState<'wheel' | 'transits' | 'year' | 'returns' | 'finder' | 'table'>('wheel')
   const [natalChart, setNatalChart] = useState<Chart | null>(null)
+  const [finderJump, setFinderJump] = useState<{ year: number; lat: number; lon: number; name: string } | null>(null)
   const [solveMenu, setSolveMenu] = useState<{ body: string; lon: number; hits: SolveHit[]; chosen: number } | null>(null)
   const [panel, setPanel] = useState<Panel>('library')
   const [editing, setEditing] = useState<Subject | null>(null)
@@ -175,6 +177,7 @@ export default function App() {
           <button className={view === 'transits' ? 'active' : ''} onClick={() => setView('transits')} disabled={!natal}>Transits</button>
           <button className={view === 'year' ? 'active' : ''} onClick={() => setView('year')} disabled={!natal}>Year ahead</button>
           <button className={view === 'returns' ? 'active' : ''} onClick={() => setView('returns')} disabled={!natal}>Returns</button>
+          <button className={view === 'finder' ? 'active' : ''} onClick={() => setView('finder')} disabled={!subject}>Finder</button>
           <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')}>Table</button>
           <button onClick={() => { setPanel('settings'); setSidebarOpen(true) }}>Settings</button>
         </div>
@@ -207,12 +210,13 @@ export default function App() {
         )}
         {view === 'returns' && natal && (
           <ReturnsView subject={subject} natalInput={!subject ? { datetime_local: isoLocal(wallClock(dateFromJd(natal.jd), natal.place.timezone)), lat: natal.place.lat, lon: natal.place.lon, timezone: natal.place.timezone, utc_offset_override: null } : null}
-            natalPlace={{ lat: natal.place.lat, lon: natal.place.lon, name: natal.place.name }} settings={settings} defaultYear={defaultYear} natalWheelData={natalWheel}
+            natalPlace={{ lat: natal.place.lat, lon: natal.place.lon, name: natal.place.name }} settings={settings} defaultYear={finderJump?.year ?? defaultYear} natalWheelData={natalWheel} initialPlace={finderJump ? { lat: finderJump.lat, lon: finderJump.lon, name: finderJump.name } : null}
             onJump={(j, pl) => { setLocked(true); setPlace({ lat: pl.lat, lon: pl.lon, name: pl.name, timezone: null }); setJd(j); setView('wheel') }}
             onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} />
         )}
+        {view === 'finder' && <FinderView subject={subject} defaultYear={defaultYear} onOpenReturn={(y, lat, lon, name) => { setFinderJump({ year: y, lat, lon, name }); setView('returns') }} />}
         {chart && view === 'table' && <TableView chart={chart} highlight={highlight} onSelect={setHighlight} />}
-        {chart && view !== 'year' && view !== 'returns' && (
+        {chart && view !== 'year' && view !== 'returns' && view !== 'finder' && (
           <div className="provenance">
             {chart.provenance.house_system} · {chart.provenance.zodiac}{chart.provenance.ayanamsa ? ` (${chart.provenance.ayanamsa})` : ''} · {chart.provenance.node_type} node · {chart.is_day ? 'day' : 'night'} chart
             {natal && natal.flags.length > 0 && <span className="flag"> · natal offset flags: {natal.flags.join(', ')}</span>}

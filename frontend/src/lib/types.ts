@@ -317,3 +317,61 @@ export interface LunarInstant {
   local_datetime: string
   timezone: string | null
 }
+
+export interface Reason { rule: string; points: number; text: string; body: string | null; status: string }
+
+export interface PlaceScore {
+  lat: number
+  lon: number
+  jd_ut: number
+  utc_datetime: string
+  local_datetime: string
+  timezone: string | null
+  disqualified: boolean
+  tier: 'best' | 'safe' | 'marginal' | 'disqualified'
+  total: number
+  stars: number
+  dominant: string | null
+  facts: { asc_natal_house: number; sun_houses: number[]; mars_houses: number[]; houses_of: Record<string, number[]>; stelliums: { house: number; bodies: string[] }[]; angular: { body: string; angle: string; orb: number }[]; asc_cusp_distance: number }
+  reasons: Reason[]
+  gains: Reason[]
+  costs: Reason[]
+  cautions: string[]
+  robustness: { asc_cusp_distance?: number; birth_time_tests?: Record<string, string>; flips?: boolean; tier_hit?: string | null }
+  versus_base: { fixes?: string[]; worsens?: string[]; base_total?: number; base_tier?: string }
+  marginal_vs_base: boolean
+}
+
+export interface CityResult extends PlaceScore {
+  name: string
+  country: string
+  admin1: string
+  population: number
+  airport_code: string
+  airport_km: number
+}
+
+export interface FinderResult {
+  year: number
+  jd_sr: number
+  goal: string | null
+  options: Record<string, unknown>
+  context: { themes: string[]; heavy_hits: { body: string; aspect: string; natal_point: string; local_datetime: string }[]; houses_transited: Record<string, number[]>; houses_entered: Record<string, number[]> }
+  grid: { step: number; cells: { lat: number; lon: number; score: number | null; tier: string }[] }
+  cities: CityResult[]
+  base: PlaceScore
+  previous: PlaceScore
+  counts: Record<string, number>
+}
+
+export interface FinderRequest {
+  subject_id: string
+  year: number
+  goal: string | null
+  population_floor: number
+  airport_max_km: number
+  exclude_countries: string[]
+  precessed: boolean
+  safety_cusp_filter: boolean
+  grid_step: number
+}

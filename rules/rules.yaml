@@ -1,4 +1,4 @@
-# Aimed solar return scoring rules (Ciro Discepolo method), version 2.
+# Aimed solar return scoring rules (Ciro Discepolo method), version 2.1 (weights calibrated on Katia's 2027 reading, 8 Nov 2026).
 # Every rule has: status core (stated in the book, with the page) or confirm (a weight the book
 # does not give in numbers, or a rule from the owner still to be checked against the Great Treatise).
 # Book: Transits and Solar Returns (AFA). "TR n" = Thirty Rules (ch. 1, pp. 1-7). "SRG n" = Solar Return
@@ -85,29 +85,29 @@ hard_filters:                # any one of these disqualifies the place; the reas
 # ---------------------------------------------------------------------------------------------
 sr_asc_natal_house:          # points by the natal house the SR Ascendant falls in (ch. 12 pp. 159-163)
   1: hard
-  2: {weight: -15, text: "money circulates, mostly out; beware theft and fraud (p. 159-160)", status: confirm}
+  2: {weight: -5, text: "money circulates, mostly out; beware theft and fraud (p. 159-160)", status: confirm (Katia read Sucre's natal 2nd as good for money)}
   3: {weight: 0, text: "vehicle, quick trips, studies; driving accident risk (p. 160)", status: core}
   4: {weight: 0, text: "real estate, parents, possible relocation (p. 160)", status: core}
   5: {weight: 0, text: "a romance begins or ends; children in focus (p. 160-161)", status: core, goals: {love: 15}}
   6: hard
-  7: {weight: -15, text: "hostility, legal matters, separation; or marriage (p. 161; TR 7)", status: confirm}
-  8: {weight: -30, text: "money drain; acceptable only if no other solution (p. 161-162; SRG 9)", status: confirm}
+  7: {weight: -10, text: "hostility, legal matters, separation; or marriage (p. 161; TR 7)", status: confirm}
+  8: {weight: -15, text: "money drain; acceptable only if no other solution (p. 161-162; SRG 9)", status: confirm (Katia 2027 did not count it against Ceduna)}
   9: {weight: 5, text: "journeys, higher studies; careful driving (p. 162)", status: confirm}
   10: {weight: 30, text: "awards, promotion, freedom from the past; virtually without exception positive (TR 13; p. 162)", status: core,
        cautions: ["SRG 6: avoid unless experienced; Jupiter, Venus or the Sun on the SR MC is the safer choice",
                   "TR 14: cancelled by a dissonant Saturn, Uranus, Neptune or Pluto transit to natal MC, ASC, Sun or Moon this year"]}
-  11: {weight: -15, text: "bereavement often; or friends and support (TR 10; p. 163; SRG 16)", status: confirm}
+  11: {weight: -5, text: "bereavement often; or friends and support (TR 10; p. 163; SRG 16)", status: confirm (Katia read it as easy relationships)}
   12: hard
 
 sun_sr_house:                # the SR Sun's own house (ch. 12 reads Sun, stellium and Ascendant alike)
   1: hard
-  2: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  2: {weight: -5, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
   3: {weight: 0, status: core}
   4: {weight: 0, status: core}
   5: {weight: 10, text: "romance, children, fun (p. 160)", status: confirm, goals: {love: 20}}
   6: hard
-  7: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
-  8: {weight: -10, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  7: {weight: -5, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
+  8: {weight: -5, text: "Sun in 2nd, 7th or 8th inverts the current situation (TR 8)", status: confirm}
   9: {weight: 10, text: "journeys, higher knowledge (p. 162)", status: confirm}
   10: {weight: 25, text: "awards and achievements (p. 162)", status: confirm}
   11: {weight: -10, text: "the 11th often means bereavement (TR 10)", status: confirm}
@@ -121,15 +121,15 @@ planet_sr_house:             # weights per planet and SR house (ch. 13). hard = 
     status: confirm
   mars:                      # pp. 171-174; "Mars can be much more difficult than Saturn, Neptune or Pluto"
     1: hard
-    2: {weight: -20, text: "excessive expenses, theft, fraud (p. 172)"}
+    2: {weight: -10, text: "excessive expenses, theft, fraud (p. 172)"}
     3: {weight: -15, text: "vehicle accidents, exam failure, quarrels (p. 172)"}
     4: {weight: -5, text: "remodeling; one of the better positions, but fire, theft, quarrels with parents (p. 172)"}
     5: {weight: -10, text: "turbulence in love, disputes with children (p. 172-173)"}
     6: hard
     7: {weight: -30, text: "quarrels with a partner, parting, legal trouble, assault (p. 173)"}
-    8: {weight: -25, text: "money drain: theft, fraud, bad loans, taxes (p. 173)"}
+    8: {weight: -10, text: "money drain: theft, fraud, bad loans, taxes (p. 173)"}
     9: {weight: -15, text: "accidents on journeys, falls, broken bones (p. 173-174)"}
-    10: {weight: -10, text: "equally positive and negative: effort, or troubles at work (p. 174)"}
+    10: {weight: -5, text: "equally positive and negative: effort and criticism, or troubles at work (p. 174)"}
     11: {weight: -10, text: "quarrels with friends, loss of a supporter (p. 174)"}
     12: hard
     status: confirm (houses from the book, weights mine)
@@ -139,25 +139,25 @@ planet_sr_house:             # weights per planet and SR house (ch. 13). hard = 
     3: {weight: -10, text: "trouble with siblings, education paused, commuting (p. 178)"}
     4: {weight: -10, text: "parents' trouble, home expenses, oppressive atmosphere (p. 178)"}
     5: {weight: -10, text: "fewer joys, trouble for children, separation (p. 178-179)"}
-    6: {weight: -25, text: "a chronic physical problem, workplace difficulties (p. 179)"}
+    6: {weight: -20, text: "a chronic physical problem, overwork; health needs daily prevention (p. 179)"}
     7: {weight: -15, text: "relationship troubles, often temporary; legal issues (p. 179)"}
     8: {weight: -25, text: "difficult finances get worse; taxes, inheritance fights (p. 179)"}
-    9: {weight: -15, text: "avoid travel; delays, bad news from far away (p. 179-180)"}
+    9: {weight: -5, text: "avoid travel; delays, bad news from far away (p. 179-180); Katia parks Saturn here"}
     10: {weight: -25, text: "career setback, job loss, resignation (p. 180)"}
     11: {weight: -15, text: "loss of a friend or supporter; hostility (p. 180)"}
     12: {weight: -25, text: "nuisances in any area, seclusion; worse near the Ascendant (p. 180)"}
     status: confirm (houses from the book, weights mine)
   jupiter:                   # pp. 174-177; "where you find your main resources"; 2/7/8 bistable (TR 8)
-    1: {weight: 10, text: "recovery, comeback; watch weight and swindles (p. 174-175)"}
-    2: {weight: 0, text: "money circulates both ways; loss when 12/1/6 involved (p. 175; TR 8)"}
+    1: {weight: 20, text: "health and happiness, recovery, comeback (p. 174-175; Katia)"}
+    2: {weight: 10, text: "luck with money, circulating both ways (p. 175; TR 8; Katia)"}
     3: {weight: 10, text: "vehicle, trips, good news, exams (p. 175)"}
     4: {weight: 15, text: "advantages from real estate, parents better off (p. 175)"}
     5: {weight: 15, text: "new love, fun, children's good news; rarely negative (p. 175-176)"}
     6: {weight: 15, text: "protection of health, better work conditions (p. 176)"}
-    7: {weight: 5, text: "helps love and legal matters, but can also bring quarrels (p. 176; TR 8)"}
+    7: {weight: 10, text: "helps love, partnership and legal matters, but TR 8 bistable (p. 176; Katia)"}
     8: {weight: 0, text: "increased flow of money, income or drain (p. 176; TR 8)"}
     9: {weight: 15, text: "travel and benefits from abroad, studies (p. 176)"}
-    10: {weight: 20, text: "professional growth, almost always irreversible (p. 177)"}
+    10: {weight: 25, text: "professional growth, almost always irreversible (p. 177)"}
     11: {weight: 15, text: "friends in high places, support, projects (p. 177)"}
     12: {weight: 25, text: "perhaps Jupiter's best position: the guardian angel (p. 177)"}
     status: confirm (houses from the book, weights mine)
@@ -181,7 +181,7 @@ planet_sr_house:             # weights per planet and SR house (ch. 13). hard = 
     4: {weight: -5, text: "sudden change of home; electrical and weather damage (p. 181)"}
     6: {weight: -20, text: "changes at work; anxiety (p. 182)"}
     7: {weight: -10, text: "change in a relationship, sudden legal issues (p. 182)"}
-    8: {weight: -15, text: "dramatic loss of money, or unexpected income (p. 182)"}
+    8: {weight: -5, text: "a money shock, then a new source of income (p. 182; Katia)"}
     10: {weight: 5, text: "career turning point, new opportunities (p. 182-183)"}
     11: {weight: -5, text: "loss of someone close, friendships change (p. 183)"}
     12: {weight: -20, text: "an unforeseen hindrance; less than Mars (p. 183)"}
@@ -197,7 +197,7 @@ planet_sr_house:             # weights per planet and SR house (ch. 13). hard = 
     12: {weight: -20, text: "anguish; avoid the sea; hospitalization possible (p. 185)"}
     status: confirm (houses from the book, weights mine)
   pluto:                     # pp. 185-187; "does not represent a dangerous or hostile element"
-    1: {weight: -15, text: "willpower, arrogance; worse with SR Ascendant in natal 1st (p. 185-186)"}
+    1: {weight: -5, text: "willpower, arrogance; worse with SR Ascendant in natal 1st (p. 185-186); not dangerous (p. 185)"}
     2: {weight: -5, text: "grandiose aims, expenses increase (p. 186)"}
     6: {weight: -15, text: "health problems, but less than Mars (p. 186)"}
     7: {weight: -10, text: "marriage or separation, important lawsuit (p. 187)"}
@@ -216,9 +216,9 @@ overrides:
     description: >
       "Saturn always wins over Jupiter, Venus, the Sun" (SRG 24): Saturn within the angular orb of an angle,
       even from the neighbouring house, cancels every benefic bonus on that angle.
-    orb_degrees: 12
+    orb_degrees: 5
     angles: [mc, asc, dsc, ic]
-    status: core (MC, book uses 5 deg), confirm (other angles, 12 deg)
+    status: core (MC, SRG 24 uses 5 deg), confirm (other angles)
   - id: heavy_transit_cancels_natal_10th
     description: >
       TR 14: the SR Ascendant in the natal 10th with a dissonant transit of Saturn, Uranus, Neptune or Pluto to the
@@ -243,9 +243,15 @@ robustness:
   birth_time_shifts_minutes: [-45, -30]  # SRG 7: recompute as if born 30 to 45 minutes earlier ...
   use_subject_uncertainty: true          # ... and with +/- the chart's own time confidence
   flip_costs_stars: 1
+  fixed_shifts_affect_tier: false       # SRG 7's 30/45-minute test is reported as a warning only (Katia kept Chilliwack, which fails it)
+  uncertainty_shifts_affect_tier: true  # the chart's own time confidence (within 5 / 30 min) does move the tier
+  disqualified_under_shift_tier: marginal
 
 star_rating:
   thresholds: [-60, -20, 10, 40, 70]     # placeholders; tune after real scores (owner F18)
+tiers:                                   # calibrated on Katia 2027: Ceduna and Chilliwack best, Santiago plain but safe
+  best: 40
+  safe: -10
 
 city_search_defaults:                    # owner 8 Nov 2026: any inhabited place reachable by a flight plus a few hours' drive
   population_floor: 15000                # every GeoNames city (the file starts at 15,000); raise it in the finder form
@@ -259,7 +265,7 @@ city_search_defaults:                    # owner 8 Nov 2026: any inhabited place
 katia:
   dominant_planet:             # the planet closest to an angle "is the diagnosis of the year"
     orb_degrees: 5
-    weights: {venus: 25, jupiter: 25, sun: 10, mercury: 0, moon: 0, uranus: -5, pluto: 0, mars: -15, saturn: -15, neptune: -15}
+    weights: {venus: 25, jupiter: 25, sun: 10, mercury: 0, moon: 0, uranus: 0, pluto: 0, mars: 0, saturn: 0, neptune: 0}   # a malefic dominant is named as a caution, its house weight already counts
     text: "Venus dominant, a happy and easy year; Jupiter dominant, protection and growth; a malefic dominant colours the whole year."
     status: confirm (Katia)
   malefic_straddles_cusp:      # "Neptune is better to take only in one house"
@@ -267,7 +273,7 @@ katia:
     weight: -10
     text: "A malefic within the cusp orb works in two houses, so two areas pay its price."
     status: confirm (Katia)
-  benefic_shares_house_with_malefic:   # Saturn 6th with Venus 6th, Neptune 7th with Venus 7th: the acceptable form of a price
+  benefic_shares_house_with_malefic:   # Saturn 6th with Venus 6th, Neptune 7th with Venus 7th: the acceptable form of a price; only where the malefic has a cost
     benefics: [venus, jupiter]
     malefics: [saturn, neptune, mars, uranus]
     weight: 10

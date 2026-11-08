@@ -17,6 +17,7 @@ interface Props {
   settings: Settings
   defaultYear: number
   natalWheelData: ReturnType<typeof wheelFromChart> | null
+  initialPlace?: Place | null
   onJump: (jd: number, place: Place) => void
   onSaved: (s: Subject) => void
 }
@@ -37,7 +38,7 @@ export function ReturnsView(p: Props) {
     : p.natalPlace
   const [kind, setKind] = useState<'solar' | 'lunar'>('solar')
   const [year, setYear] = useState(p.defaultYear)
-  const [place, setPlace] = useState<Place>(home)
+  const [place, setPlace] = useState<Place>(p.initialPlace ?? home)
   const [precessed, setPrecessed] = useState(false)
   const [layout, setLayout] = useState<'wheel' | 'biwheel' | 'table'>('biwheel')
   const [set, setSet] = useState<ReturnSet | null>(null)
@@ -48,7 +49,7 @@ export function ReturnsView(p: Props) {
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => setYear(p.defaultYear), [p.defaultYear])
-  useEffect(() => setPlace(home), [home.lat, home.lon]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => setPlace(p.initialPlace ?? home), [home.lat, home.lon, p.initialPlace]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (kind !== 'solar' || (!p.subject && !p.natalInput)) return

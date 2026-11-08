@@ -1,4 +1,4 @@
-import type { Chart, City, Keyframe, LunarInstant, ResolvedTime, ReturnChart, ReturnSet, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
+import type { Chart, City, FinderRequest, FinderResult, Keyframe, LunarInstant, ResolvedTime, ReturnChart, ReturnSet, Settings, SolveResult, Subject, SubjectIn, YearAhead } from './types'
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -60,6 +60,7 @@ export const api = {
     if (place) { p.set('lat', String(place.lat)); p.set('lon', String(place.lon)); p.set('place_name', place.name) }
     return call<ReturnChart>('GET', `/api/subjects/${id}/lunar-return?${p}`)
   },
+  finderRun: (req: FinderRequest) => call<FinderResult>('POST', '/api/finder/run', req),
   yearAhead: (id: string, year: number) => call<YearAhead>('GET', `/api/subjects/${id}/year-ahead?year=${year}`),
   yearAheadUnsaved: (subject: { datetime_local: string; lat: number; lon: number; timezone: string | null; utc_offset_override: string | null }, year: number, settings: Settings) =>
     call<YearAhead>('POST', '/api/transits/year-ahead', { subject, year, settings }),

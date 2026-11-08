@@ -253,3 +253,36 @@ city_search_defaults:                    # owner 8 Nov 2026: any inhabited place
   airport_scheduled_service_only: true
   airport_max_km: 250                    # about three hours' driving from the airport
   exclude_countries: []
+
+# ---------------------------------------------------------------------------------------------
+# Katia's practice (the owner's astrologer), from the 2027 consultation (8 Nov 2026). All confirm.
+katia:
+  dominant_planet:             # the planet closest to an angle "is the diagnosis of the year"
+    orb_degrees: 5
+    weights: {venus: 25, jupiter: 25, sun: 10, mercury: 0, moon: 0, uranus: -5, pluto: 0, mars: -15, saturn: -15, neptune: -15}
+    text: "Venus dominant, a happy and easy year; Jupiter dominant, protection and growth; a malefic dominant colours the whole year."
+    status: confirm (Katia)
+  malefic_straddles_cusp:      # "Neptune is better to take only in one house"
+    bodies: [neptune, saturn, mars, uranus]
+    weight: -10
+    text: "A malefic within the cusp orb works in two houses, so two areas pay its price."
+    status: confirm (Katia)
+  benefic_shares_house_with_malefic:   # Saturn 6th with Venus 6th, Neptune 7th with Venus 7th: the acceptable form of a price
+    benefics: [venus, jupiter]
+    malefics: [saturn, neptune, mars, uranus]
+    weight: 10
+    text: "Venus or Jupiter in the same house as the malefic softens its price."
+    status: confirm (Katia)
+  avoid_stacking_with_transit: # no malefic in the SR house whose number matches the natal house that planet's transit enters this year
+    bodies: [saturn, neptune, uranus, pluto]
+    weight: -15
+    text: "The same planet is also transiting that natal house this year, so the theme would be doubled."
+    status: confirm (Katia)
+  goal_placements:             # extra points when the goal of the year is named
+    love:   {venus: {5: 20, 7: 15}, jupiter: {5: 15, 7: 15}}
+    career: {jupiter: {10: 20}, venus: {6: 10, 10: 15}, sr_asc_natal_house: {10: 10}}
+    money:  {jupiter: {2: 20}, venus: {2: 10, 8: 10}, uranus: {8: 5, 2: 5}}
+    health: {jupiter: {1: 25, 12: 20, 6: 15}, venus: {1: 10, 6: 15}}
+    status: confirm (Katia)
+  practicality:                # between equals the easier trip wins; shown, not scored
+    note: "A capital or a city a short drive from the airport beats a remote field with the same chart."

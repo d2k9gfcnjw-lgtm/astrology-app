@@ -91,3 +91,17 @@ None that need an answer before coding; the weights are the ones you
 approved and all remain editable in the rules file. If you have one of
 Katia's readings as a file, put it in `reference/case-studies/` now and I
 will use it as the first calibration case.
+
+## Calibration (added 8 Nov 2026)
+
+Katia's 2027 consultation (nine places reasoned through) is saved locally in
+`reference/case-studies/` with a machine-readable expectation file. Before
+any finder code, the Phase 4 engine already reproduces her placements for
+all nine places (Ascendant's natal house, dual houses, dominant planets,
+stelliums). The finder test requires: New York disqualified; Vancouver and
+Seattle marked not good (three planets in the 6th); Ceduna and Chilliwack in
+the top tier; Sucre, Asunción and Hilo in the safe tier with their named
+prices; Santiago safe but plain. Her reasoning is distilled into a local
+notes file and into a `katia:` section of the rules file (dominant planet,
+malefic straddling a cusp, benefic beside a malefic, no stacking with the
+year's transit, goal placements), every item marked confirm.

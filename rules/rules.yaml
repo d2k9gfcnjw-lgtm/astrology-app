@@ -247,7 +247,9 @@ robustness:
 star_rating:
   thresholds: [-60, -20, 10, 40, 70]     # placeholders; tune after real scores (owner F18)
 
-city_search_defaults:
-  population_floor: 100000
-  airport_max_km: 150                    # SRG 13: an airport with regular service
+city_search_defaults:                    # owner 8 Nov 2026: any inhabited place reachable by a flight plus a few hours' drive
+  population_floor: 15000                # every GeoNames city (the file starts at 15,000); raise it in the finder form
+  airport_types: [large_airport, medium_airport]   # any airport with scheduled commercial service (SRG 13)
+  airport_scheduled_service_only: true
+  airport_max_km: 250                    # about three hours' driving from the airport
   exclude_countries: []

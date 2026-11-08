@@ -27,7 +27,7 @@ EPHE_FILES = [
     for prefix in ("sepl", "semo", "seas")
     for block in ("06", "12", "18", "24")
 ]
-MIN_SIZE_BYTES = 100_000  # a truncated download or an HTML error page is smaller
+MIN_SIZE_BYTES = 50_000  # a truncated download or an HTML error page is smaller
 
 
 def download(url: str, dest: Path) -> int:
@@ -88,6 +88,48 @@ def fetch_geonames(force: bool) -> bool:
         return False
 
 
+AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
+AIRPORTS_DIR = DATA / "airports"
+NE_URL = "https://naciscdn.org/naturalearth/110m/physical/ne_110m_land.zip"
+NE_DIR = DATA / "naturalearth"
+
+
+def fetch_airports(force: bool) -> bool:
+    """OurAirports airports.csv (public domain): type and scheduled_service columns pick the real airports."""
+    AIRPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    dest = AIRPORTS_DIR / "airports.csv"
+    if dest.exists() and dest.stat().st_size > 1_000_000 and not force:
+        print(f"  have   airports.csv ({dest.stat().st_size:,} bytes)")
+        return True
+    try:
+        size = download(AIRPORTS_URL, dest)
+        print(f"  fetched airports.csv ({size:,} bytes)")
+        return True
+    except Exception as exc:  # noqa: BLE001
+        print(f"  FAILED airports.csv: {exc}", file=sys.stderr)
+        return False
+
+
+def fetch_natural_earth(force: bool) -> bool:
+    """Natural Earth 1:110m land polygons (public domain) as a shapefile zip: the ocean mask for the heat map."""
+    import zipfile
+    NE_DIR.mkdir(parents=True, exist_ok=True)
+    shp = NE_DIR / "ne_110m_land.shp"
+    if shp.exists() and not force:
+        print(f"  have   ne_110m_land.shp ({shp.stat().st_size:,} bytes)")
+        return True
+    zip_path = NE_DIR / "ne_110m_land.zip"
+    try:
+        size = download(NE_URL, zip_path)
+        with zipfile.ZipFile(zip_path) as z:
+            z.extractall(NE_DIR)
+        print(f"  fetched ne_110m_land (zip {size:,} bytes)")
+        return shp.exists()
+    except Exception as exc:  # noqa: BLE001
+        print(f"  FAILED natural earth: {exc}", file=sys.stderr)
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--ephe-only", action="store_true", help="only the Swiss Ephemeris files (default for now)")
@@ -98,6 +140,10 @@ def main() -> int:
     if not args.ephe_only:
         print(f"GeoNames cities -> {GEONAMES_DIR}")
         ok = fetch_geonames(args.force) and ok
+        print(f"OurAirports -> {AIRPORTS_DIR}")
+        ok = fetch_airports(args.force) and ok
+        print(f"Natural Earth land -> {NE_DIR}")
+        ok = fetch_natural_earth(args.force) and ok
     if not ok:
         print("Some files failed. Re-run the script; it skips files already present.", file=sys.stderr)
         return 1

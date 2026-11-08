@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
+
+// Vite serves the worker as a module; MapLibre must be told where it is.
+maplibregl.setWorkerUrl(workerUrl)
 import type { FeatureCollection } from 'geojson'
 import type { CityResult, FinderResult } from '../lib/types'
 
@@ -102,7 +106,19 @@ export function FinderMap({ result, selected, onSelectCity, onClickPlace, landGe
       const { url, coords } = heatImage(result)
       m.addSource('heat', { type: 'image', url, coordinates: coords })
       m.addLayer({ id: 'heat', type: 'raster', source: 'heat', paint: { 'raster-opacity': 0.75, 'raster-resampling': 'nearest' } })
-      for (const c of result.cities.filter((x) => x.tier !== 'disqualified').slice(0, 80)) {
+      // Spread the markers: the best place of each neighbourhood, so one lucky region does not hide the others.
+      const placed: CityResult[] = []
+      const far = (a: CityResult, b: CityResult) => {
+        const dLat = a.lat - b.lat
+        const dLon = (a.lon - b.lon) * Math.cos((a.lat * Math.PI) / 180)
+        return Math.sqrt(dLat * dLat + dLon * dLon) > 2.5
+      }
+      for (const c of result.cities) {
+        if (c.tier === 'disqualified') continue
+        if (placed.every((p) => far(p, c))) placed.push(c)
+        if (placed.length >= 160) break
+      }
+      for (const c of placed) {
         const d = document.createElement('div')
         d.className = `city-marker ${c.tier}${selected && selected.name === c.name && selected.country === c.country ? ' selected' : ''}`
         d.title = `${c.name}, ${c.country}: ${c.tier} ${c.total}`

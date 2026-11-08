@@ -59,11 +59,7 @@ footer { grid-area: footer; background: var(--panel); border-top: 1px solid var(
 .empty-state { color: var(--muted); padding: 40px; }
 
 .library ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
-.library li { display: flex; align-items: center; border-radius: 6px; }
-.library li.selected { background: #e8f4f2; }
-.library li .actions { display: none; gap: 2px; }
-.library li:hover .actions { display: flex; }
-.library li.empty { color: var(--muted); padding: 8px; }
+.library li.empty { color: var(--muted); padding: 6px 8px; font-size: 12px; }
 .library-head { display: flex; justify-content: space-between; align-items: center; }
 .tags { color: var(--accent); }
 

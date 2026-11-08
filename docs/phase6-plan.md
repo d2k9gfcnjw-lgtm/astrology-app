@@ -65,8 +65,11 @@ parans within orb listed.
   chart's facts (the Phase 4 strip) and the lines and parans within orb at
   that place, nearest first; "Open this chart" sends the place to the wheel
   with location lock on, or to the Returns view for a return.
-- The finder's heat layer can be shown underneath, so a candidate city's
-  lines are read together with its score.
+- The finder's heat layer can be toggled on underneath as a separate layer.
+  Owner's rule (8 Nov 2026): astrocartography and the aimed solar return are
+  separate methods; they share the map but never inform each other. The
+  finder's score never reads the lines, the lines never read the score, and
+  each layer has its own panel.
 - Vitest for the line-segmenting and distance helpers; screenshots at both
   widths.
 

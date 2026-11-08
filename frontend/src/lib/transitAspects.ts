@@ -8,7 +8,6 @@ export function transitAspects(transits: Record<string, number>, natal: Record<s
   for (const body of ts.bodies) {
     const tl = transits[body]
     if (tl === undefined) continue
-    const maxOrb = ts.orbs[body] ?? 2
     for (const point of ts.natal_points) {
       const nl = natal[point]
       if (nl === undefined) continue
@@ -16,6 +15,7 @@ export function transitAspects(transits: Record<string, number>, natal: Record<s
       let best: Aspect | null = null
       for (const type of ts.aspects) {
         const angle = ANGLES[type]
+        const maxOrb = (type === 'semisquare' || type === 'sesquiquadrate' || type === 'semisextile' || type === 'quincunx') ? (ts.minor_orbs[body] ?? 1.5) : (ts.orbs[body] ?? 2)
         const orb = Math.abs(sep - angle)
         if (orb <= maxOrb && (!best || orb < best.orb)) best = { a: body, b: point, type, angle, separation: sep, orb, max_orb: maxOrb, applying: false, exact: orb < 1e-9 }
       }

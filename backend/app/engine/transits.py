@@ -12,6 +12,7 @@ from .time import moment_from_jd
 
 ASPECT_ANGLES = {"conjunction": 0.0, "opposition": 180.0, "trine": 120.0, "square": 90.0, "sextile": 60.0,
                  "semisextile": 30.0, "semisquare": 45.0, "sesquiquadrate": 135.0, "quincunx": 150.0}
+MINOR_ASPECTS = {"semisquare", "sesquiquadrate", "semisextile", "quincunx"}
 SIGNS = ["Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"]
 PAD_DAYS = {"moon": 5, "sun": 30, "mercury": 60, "venus": 90, "mars": 180, "jupiter": 300, "saturn": 500,
             "uranus": 700, "neptune": 900, "pluto": 1000, "chiron": 600, "node": 300, "lilith": 300}
@@ -130,10 +131,10 @@ def transit_hits(chart: Chart, ts: TransitSettings, jd0: float, jd1: float, time
     for body in ts.bodies:
         pad = PAD_DAYS.get(body, 300)
         track = Track(body, jd0 - pad, jd1 + pad, chart.settings)
-        orb = ts.orbs.get(body, 2.0)
         for point, plon in points.items():
             for aspect in ts.aspects:
                 angle = ASPECT_ANGLES[aspect]
+                orb = ts.minor_orbs.get(body, 1.5) if aspect in MINOR_ASPECTS else ts.orbs.get(body, 2.0)
                 targets = sorted({(plon + angle) % 360, (plon - angle) % 360})
                 for target in targets:
                     for c in track.crossings(target):
@@ -207,7 +208,6 @@ def station_events(chart: Chart, ts: TransitSettings, jd0: float, jd1: float, ti
     for body in ts.bodies:
         if body in ("sun", "moon"):
             continue
-        orb = ts.orbs.get(body, 2.0)
         for st in Track(body, jd0, jd1, chart.settings).stations():
             if not in_window(st.jd_ut, jd0, jd1):
                 continue
@@ -215,6 +215,7 @@ def station_events(chart: Chart, ts: TransitSettings, jd0: float, jd1: float, ti
             for point, plon in points.items():
                 for aspect in ts.aspects:
                     angle = ASPECT_ANGLES[aspect]
+                    orb = ts.minor_orbs.get(body, 1.5) if aspect in MINOR_ASPECTS else ts.orbs.get(body, 2.0)
                     sep = abs(((st.lon - plon + 180) % 360) - 180)
                     d = abs(sep - angle)
                     if d <= orb:

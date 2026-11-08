@@ -57,9 +57,15 @@ class TransitSettings(BaseModel):
     bodies: list[str] = Field(default_factory=lambda: ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"])
     natal_points: list[str] = Field(default_factory=lambda: ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn",
                                                              "uranus", "neptune", "pluto", "asc", "dsc", "mc", "ic"])
-    aspects: list[str] = Field(default_factory=lambda: ["conjunction", "opposition", "trine", "square", "sextile"])
+    # Thirty Rules 12: semisquares and sesquisquares count like squares; sextiles, semisextiles and quincunxes hardly matter.
+    # Rule 11: trines of Uranus, Neptune and Pluto are kept because they often bring trouble too.
+    aspects: list[str] = Field(default_factory=lambda: ["conjunction", "opposition", "square", "trine", "semisquare", "sesquiquadrate"])
+    # Rule 23 orbs: fast planets 5, Jupiter and Saturn 3, Uranus and Neptune 2, Pluto 1 (owner 27 Oct: 3 / 2 / 1.5 for the slow ones).
     orbs: dict[str, float] = Field(default_factory=lambda: {"sun": 3, "moon": 3, "mercury": 3, "venus": 3, "mars": 3, "jupiter": 3,
                                                             "saturn": 3, "uranus": 2, "neptune": 1.5, "pluto": 1.5, "chiron": 2, "node": 2, "lilith": 2})
+    # Rule 23: semisquare and sesquisquare orbs at their minimum, 2 to 3 deg for fast planets, 1 to 2 for slow ones.
+    minor_orbs: dict[str, float] = Field(default_factory=lambda: {"sun": 2.5, "moon": 2.5, "mercury": 2.5, "venus": 2.5, "mars": 2.5, "jupiter": 2,
+                                                                  "saturn": 2, "uranus": 1.5, "neptune": 1.5, "pluto": 1, "chiron": 1.5, "node": 1.5, "lilith": 1.5})
     include_ingresses: bool = True
     include_sign_ingresses: bool = True
     include_stations: bool = True

@@ -16,6 +16,7 @@ export interface TransitSettings {
   natal_points: string[]
   aspects: string[]
   orbs: Record<string, number>
+  minor_orbs: Record<string, number>
   include_ingresses: boolean
   include_sign_ingresses: boolean
   include_stations: boolean
@@ -24,7 +25,8 @@ export interface TransitSettings {
 export const DEFAULT_TRANSITS: TransitSettings = {
   bodies: ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'],
   natal_points: ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'asc', 'dsc', 'mc', 'ic'],
-  aspects: ['conjunction', 'opposition', 'trine', 'square', 'sextile'],
+  aspects: ['conjunction', 'opposition', 'square', 'trine', 'semisquare', 'sesquiquadrate'],
+  minor_orbs: { sun: 2.5, moon: 2.5, mercury: 2.5, venus: 2.5, mars: 2.5, jupiter: 2, saturn: 2, uranus: 1.5, neptune: 1.5, pluto: 1, chiron: 1.5, node: 1.5, lilith: 1.5 },
   orbs: { sun: 3, moon: 3, mercury: 3, venus: 3, mars: 3, jupiter: 3, saturn: 3, uranus: 2, neptune: 1.5, pluto: 1.5, chiron: 2, node: 2, lilith: 2 },
   include_ingresses: true,
   include_sign_ingresses: true,

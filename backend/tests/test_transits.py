@@ -17,7 +17,8 @@ def test_defaults_match_owner_decisions():
     assert t.orbs["jupiter"] == 3 and t.orbs["saturn"] == 3 and t.orbs["uranus"] == 2
     assert t.orbs["neptune"] == 1.5 and t.orbs["pluto"] == 1.5 and t.orbs["mars"] == 3
     assert t.natal_points == ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "asc", "dsc", "mc", "ic"]
-    assert t.aspects == ["conjunction", "opposition", "trine", "square", "sextile"]
+    assert t.aspects == ["conjunction", "opposition", "square", "trine", "semisquare", "sesquiquadrate"]  # Thirty Rules 12
+    assert t.minor_orbs["pluto"] == 1 and t.minor_orbs["mars"] == 2.5  # Rule 23
     assert t.include_ingresses and t.include_stations
 
 
@@ -50,7 +51,9 @@ def test_hits_have_exact_instant_inside_orb_span_and_passes():
     assert hits, "Jupiter makes aspects to something in a year"
     for h in hits:
         assert start <= h.jd_ut < end
-        assert h.body == "jupiter" and h.aspect in {"conjunction", "opposition", "trine", "square", "sextile"}
+        assert h.body == "jupiter" and h.aspect in {"conjunction", "opposition", "trine", "square", "semisquare", "sesquiquadrate"}
+        if h.aspect in ("semisquare", "sesquiquadrate"):
+            assert h.orb == 2
         assert h.orb_enter_jd is None or h.orb_enter_jd <= h.jd_ut
         assert h.orb_exit_jd is None or h.orb_exit_jd >= h.jd_ut
         assert 1 <= h.pass_index <= h.pass_count <= 5

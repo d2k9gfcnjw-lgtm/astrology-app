@@ -185,3 +185,17 @@ fieldset label input[type="number"] { width: 70px; }
 .live { color: var(--accent); font-weight: 400; font-size: 13px; }
 
 .glyph { font-size: 1.15em; line-height: 1; }
+
+/* Library grouped by person */
+.people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.person { display: block; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.person.selected { border-color: var(--accent); }
+.person-head { display: flex; align-items: center; flex-wrap: nowrap; gap: 2px; padding: 2px 4px; }
+.person-head .link b { font-size: 15px; }
+.charts { list-style: none; margin: 0; padding: 0 4px 4px 18px; display: flex; flex-direction: column; }
+.chart-row { display: flex; align-items: center; flex-wrap: nowrap; border-radius: 6px; } .chart-row.selected { background: #e8f4f2; }
+.chart-row .actions, .person-head .actions { display: flex; flex: none; gap: 0; opacity: 0.35; } .chart-row:hover .actions, .person-head:hover .actions { opacity: 1; }
+.chart-row .actions .icon, .person-head .actions .icon { padding: 2px 5px; font-size: 12px; border: none; background: none; }
+.person-head .link, .chart-row .link { min-width: 0; }
+.home { color: var(--accent); } .home.missing { color: var(--warn); }
+.home-box { border-color: var(--accent); background: #f3faf8; }

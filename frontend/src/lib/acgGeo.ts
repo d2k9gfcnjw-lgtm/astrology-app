@@ -1,10 +1,8 @@
 import type { AcgLine, Paran } from './types'
+import { BODY_COLORS } from './angles'
 import type { Feature, FeatureCollection, LineString } from 'geojson'
 
-export const BODY_COLORS: Record<string, string> = {
-  sun: '#e6a100', moon: '#8a8a8a', mercury: '#2a9d8f', venus: '#d63384', mars: '#d62828', jupiter: '#6a4c93',
-  saturn: '#3d405b', uranus: '#00a6fb', neptune: '#1d4ed8', pluto: '#7b2d26', chiron: '#5a7d2a', node: '#444',
-}
+export { BODY_COLORS } from './angles'
 export const ANGLE_DASH: Record<string, number[] | undefined> = { asc: undefined, dsc: [2, 2], mc: undefined, ic: [2, 2] }
 
 /** Lines as GeoJSON features, one per segment, with body and angle properties. */

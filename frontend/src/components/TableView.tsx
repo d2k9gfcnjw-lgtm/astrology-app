@@ -1,6 +1,6 @@
-import { BODY_NAMES, BODY_ORDER, SIGN_NAMES, formatDM, signIndex } from '../lib/angles'
+import { BODY_COLORS, BODY_NAMES, BODY_ORDER, SIGN_NAMES, formatDM, signIndex } from '../lib/angles'
 import type { BodyPosition, Chart } from '../lib/types'
-import { BODY_CHARS, GLYPH_FONT, SIGN_CHARS } from '../lib/glyphs'
+import { BODY_CHARS, BODY_FONT, GLYPH_FONT, SIGN_CHARS } from '../lib/glyphs'
 
 const dms = (v: number) => {
   const sign = v < 0 ? '-' : '+'
@@ -22,7 +22,7 @@ export function TableView({ chart, highlight, onSelect }: { chart: Chart; highli
         <tbody>
           {rows.map(([k, b]) => (
             <tr key={k} className={highlight === k ? 'selected' : ''} onClick={() => onSelect?.(highlight === k ? null : k)}>
-              <td><span className="glyph" style={{ fontFamily: GLYPH_FONT }}>{BODY_CHARS[k]}</span> {BODY_NAMES[k]}{b.variant ? ` (${b.variant})` : ''}</td>
+              <td><span className="glyph" style={{ fontFamily: BODY_FONT, color: BODY_COLORS[k] }}>{BODY_CHARS[k]}</span> {BODY_NAMES[k]}{b.variant ? ` (${b.variant})` : ''}</td>
               <td>{formatDM(b.lon)}{b.retrograde ? ' ℞' : ''}</td>
               <td><span className="glyph" style={{ fontFamily: GLYPH_FONT }}>{SIGN_CHARS[signIndex(b.lon)]}</span> {SIGN_NAMES[signIndex(b.lon)]}</td>
               <td>{chart.planet_houses[k]}</td>

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
-import { ASPECT_STYLE, BODY_NAMES, BODY_ORDER, ELEMENT_COLORS, ELEMENT_OF_SIGN, SIGN_NAMES, formatDM, norm } from '../lib/angles'
-import { BODY_CHARS, BODY_PATHS, Glyph, SIGN_CHARS, SIGN_PATHS } from '../lib/glyphs'
+import { ASPECT_STYLE, BODY_COLORS, BODY_NAMES, BODY_ORDER, ELEMENT_COLORS, ELEMENT_OF_SIGN, SIGN_NAMES, formatDM, norm } from '../lib/angles'
+import { BODY_CHARS, BODY_FONT, BODY_PATHS, Glyph, SIGN_CHARS, SIGN_PATHS } from '../lib/glyphs'
 import { spreadLabels } from '../lib/spread'
 import { lonFromPoint, pointOnWheel } from '../lib/wheelGeometry'
 import type { Aspect, WheelData } from '../lib/types'
@@ -147,7 +147,7 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
       <g key={k} className={`planet${sel ? ' selected' : ''}`} onClick={() => onSelect?.(sel ? null : k)} style={{ cursor: 'pointer' }}>
         <line x1={tick0.x} y1={tick0.y} x2={tick1.x} y2={tick1.y} stroke="#333" strokeWidth={1.5} />
         <line x1={tick1.x} y1={tick1.y} x2={lead.x} y2={lead.y} stroke="#999" strokeWidth={0.7} />
-        <Glyph d={BODY_PATHS[k]} char={BODY_CHARS[k]} x={g.x} y={g.y} size={24} color={sel ? '#b5179e' : '#111'} strokeWidth={2} title={BODY_NAMES[k]} />
+        <Glyph d={BODY_PATHS[k]} char={BODY_CHARS[k]} font={BODY_FONT} x={g.x} y={g.y} size={24} color={sel ? '#b5179e' : BODY_COLORS[k] ?? '#111'} strokeWidth={2} title={BODY_NAMES[k]} />
         <text x={d.x} y={d.y} className="planet-deg" textAnchor="middle" dominantBaseline="middle">
           {formatDM(body.lon)}{body.retrograde ? '℞' : ''}
         </text>
@@ -188,7 +188,7 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
         }}>
         <line x1={tick0.x} y1={tick0.y} x2={tick1.x} y2={tick1.y} stroke="#1d4ed8" strokeWidth={1.6} />
         <line x1={tick1.x} y1={tick1.y} x2={lead.x} y2={lead.y} stroke="#9bb" strokeWidth={0.7} />
-        <Glyph d={BODY_PATHS[k]} char={BODY_CHARS[k]} x={g.x} y={g.y} size={22} color={sel ? '#b5179e' : '#1d4ed8'} strokeWidth={2} title={`transit ${BODY_NAMES[k]}`} />
+        <Glyph d={BODY_PATHS[k]} char={BODY_CHARS[k]} font={BODY_FONT} x={g.x} y={g.y} size={22} color={sel ? '#b5179e' : BODY_COLORS[k] ?? '#1d4ed8'} strokeWidth={2} title={`transit ${BODY_NAMES[k]}`} />
         <text x={d.x} y={d.y} className="planet-deg transit-deg" textAnchor="middle" dominantBaseline="middle">
           {formatDM(body.lon)}{body.retrograde ? '℞' : ''}
         </text>
@@ -204,7 +204,7 @@ export function Wheel({ data, transits, highlight, onSelect }: Props) {
     return (
       <g className="drag-ghost" pointerEvents="none">
         <line x1={t0.x} y1={t0.y} x2={t1.x} y2={t1.y} stroke="#b5179e" strokeWidth={2} />
-        <Glyph d={BODY_PATHS[drag.body]} char={BODY_CHARS[drag.body]} x={g.x} y={g.y} size={24} color="#b5179e" strokeWidth={2.2} />
+        <Glyph d={BODY_PATHS[drag.body]} char={BODY_CHARS[drag.body]} font={BODY_FONT} x={g.x} y={g.y} size={24} color="#b5179e" strokeWidth={2.2} />
         <text x={d.x} y={d.y} className="planet-deg" fill="#b5179e" textAnchor="middle" dominantBaseline="middle">{formatDM(drag.lon)} {SIGN_NAMES[Math.floor(norm(drag.lon) / 30)].slice(0, 3)}</text>
       </g>
     )

@@ -33,7 +33,8 @@ export const BODY_PATHS: Record<string, string> = {
 
 // Owner's choice (8 Nov 2026): style E, the Mac's Apple Symbols font. Other devices fall back to the bundled
 // Noto Sans Symbols (SIL Open Font License, frontend/public/fonts). The hand-drawn paths above stay as a fallback style.
-export const GLYPH_FONT = '"Apple Symbols", "NotoSym", "NotoSym2", "Segoe UI Symbol", sans-serif'
+export const GLYPH_FONT = '"Apple Symbols", "NotoSym", "NotoSym2", "Segoe UI Symbol", sans-serif'   // signs: style E
+export const BODY_FONT = '"NotoSym", "NotoSym2", "Apple Symbols", "Segoe UI Symbol", sans-serif'    // planets: style P4 (owner, 8 Nov 2026)
 export type GlyphStyle = 'font' | 'drawn'
 export let GLYPH_STYLE: GlyphStyle = 'font'
 export function setGlyphStyle(s: GlyphStyle) { GLYPH_STYLE = s }
@@ -56,10 +57,10 @@ interface GlyphProps {
 }
 
 /** Draw a glyph centred at (x, y) at `size` px: a font character (style E) or the 20x20 drawn path. */
-export function Glyph({ d, x, y, size, color = 'currentColor', strokeWidth = 1.7, title, char }: GlyphProps & { char?: string }) {
+export function Glyph({ d, x, y, size, color = 'currentColor', strokeWidth = 1.7, title, char, font }: GlyphProps & { char?: string; font?: string }) {
   if (GLYPH_STYLE === 'font' && char) {
     return (
-      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontFamily={GLYPH_FONT} fontSize={size * 1.3} fill={color} stroke="none" style={{ userSelect: 'none' }}>
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontFamily={font ?? GLYPH_FONT} fontSize={size * 1.3} fill={color} stroke="none" style={{ userSelect: 'none' }}>
         {title && <title>{title}</title>}
         {char}
       </text>

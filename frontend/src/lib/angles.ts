@@ -9,6 +9,12 @@ export const BODY_NAMES: Record<string, string> = {
   uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto', node: 'Node', chiron: 'Chiron', lilith: 'Lilith', fortune: 'Fortune',
 }
 
+// Classic planet colours (owner's choice P4, 8 Nov 2026); also used on the map lines.
+export const BODY_COLORS: Record<string, string> = {
+  sun: '#d9a300', moon: '#7f8c9a', mercury: '#2a9d8f', venus: '#d63384', mars: '#d62828', jupiter: '#6a4c93', saturn: '#3d405b',
+  uranus: '#00a6c0', neptune: '#1d4ed8', pluto: '#7b2d26', node: '#555555', chiron: '#5a7d2a', lilith: '#333333', fortune: '#8d6e00',
+}
+
 export const ASPECT_STYLE: Record<string, { color: string; dash?: string; width: number }> = {
   conjunction: { color: '#2a9d8f', width: 1.6 },
   opposition: { color: '#c1121f', width: 1.6 },

@@ -38,6 +38,7 @@ export default function App() {
   const [natalChart, setNatalChart] = useState<Chart | null>(null)
   const [finderJump, setFinderJump] = useState<{ year: number; lat: number; lon: number; name: string } | null>(null)
   const [finderResult, setFinderResult] = useState<FinderResult | null>(null)
+  const [live, setLive] = useState(false)
   const [land, setLand] = useState<FeatureCollection | null>(null)
   useEffect(() => { fetch('/api/finder/land').then((r) => r.json()).then(setLand).catch(() => setLand(null)) }, [])
   const [solveMenu, setSolveMenu] = useState<{ body: string; lon: number; hits: SolveHit[]; chosen: number } | null>(null)
@@ -51,6 +52,24 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 900)
 
   const setJd = useCallback((v: number) => { jdRef.current = v; setJdState(v) }, [])
+
+  // Chart of the moment: keep the clock on "now" while live is on (every 10 s; the Ascendant moves about 2.5 deg in that time).
+  useEffect(() => {
+    if (!live) return
+    setJd(jdNow())
+    const id = window.setInterval(() => setJd(jdNow()), 10000)
+    return () => window.clearInterval(id)
+  }, [live, setJd])
+
+  const showNowSky = useCallback(() => {
+    const home = subject && subject.home_lat !== null && subject.home_lon !== null
+      ? { lat: subject.home_lat, lon: subject.home_lon, name: subject.home_place_name, timezone: subject.home_timezone }
+      : natal ? natal.place : place
+    setPlace(home)
+    setLocked(false)
+    setView('wheel')
+    setLive(true)
+  }, [subject, natal, place])
 
   // Fetch the full chart whenever the instant, place or settings change (not while spinning).
   useEffect(() => {
@@ -71,7 +90,7 @@ export default function App() {
   const onFrame = useCallback((f: Keyframe) => { setFrame(f); setJdState(f.jd_ut) }, [])
   const onStop = useCallback((v: number) => { setSpinning(false); setJd(v) }, [setJd])
   const spin = useSpin({ jdRef, lat: place.lat, lon: place.lon, settings, speed: spinSpeed, onFrame, onStop })
-  const onSpinRate = useCallback((r: number) => { if (r !== 0) setSpinning(true); spin.setRate(r) }, [spin])
+  const onSpinRate = useCallback((r: number) => { if (r !== 0) { setSpinning(true); setLive(false) } spin.setRate(r) }, [spin])
 
   const wall = useMemo(() => wallClock(dateFromJd(jd), place.timezone), [jd, place.timezone])
 
@@ -141,6 +160,7 @@ export default function App() {
   }, [settings, setJd])
 
   const step = useCallback(async (amount: number, unit: StepUnit) => {
+    setLive(false)
     if (unit === 'month' || unit === 'year') {
       const w = stepWall(wall, amount, unit)
       try {
@@ -153,6 +173,7 @@ export default function App() {
   }, [jd, wall, place, setJd])
 
   const setLocal = useCallback(async (iso: string) => {
+    setLive(false)
     try {
       const r = await api.resolveTime(iso, place.lat, place.lon, place.timezone, null)
       setJd(r.jd_ut)
@@ -177,9 +198,10 @@ export default function App() {
     <div className={`app${sidebarOpen ? '' : ' sidebar-closed'}`}>
       <header>
         <button className="icon" onClick={() => setSidebarOpen((v) => !v)} title="Charts">☰</button>
-        <h1>{subject?.name ?? (natal ? 'Unsaved chart' : 'Astrology workstation')}</h1>
+        <h1>{live ? 'Chart of the moment' : subject?.name ?? (natal ? 'Unsaved chart' : 'Astrology workstation')}{live && <small className="live"> · live</small>}</h1>
         <div className="header-actions">
-          <button className={view === 'wheel' ? 'active' : ''} onClick={() => setView('wheel')}>Wheel</button>
+          <button className={live ? 'active' : ''} onClick={showNowSky} title="The sky right now, kept up to date">Now sky</button>
+          <button className={view === 'wheel' && !live ? 'active' : ''} onClick={() => { setLive(false); setView('wheel') }}>Wheel</button>
           <button className={view === 'transits' ? 'active' : ''} onClick={() => setView('transits')} disabled={!natal}>Transits</button>
           <button className={view === 'year' ? 'active' : ''} onClick={() => setView('year')} disabled={!natal}>Year ahead</button>
           <button className={view === 'returns' ? 'active' : ''} onClick={() => setView('returns')} disabled={!natal}>Returns</button>
@@ -233,8 +255,8 @@ export default function App() {
         )}
       </main>
       <footer>
-        <TimeControls wall={wall} timezone={place.timezone} jd={jd} flags={[]} onStep={step} onSetLocal={setLocal} onNow={() => setJd(jdNow())}
-          onNatal={() => { if (natal) { setPlace(natal.place); setJd(natal.jd) } }} hasNatal={natal !== null}
+        <TimeControls wall={wall} timezone={place.timezone} jd={jd} flags={[]} onStep={step} onSetLocal={setLocal} onNow={() => { setLive(false); setJd(jdNow()) }}
+          onNatal={() => { if (natal) { setLive(false); setPlace(natal.place); setJd(natal.jd) } }} hasNatal={natal !== null}
           spinSpeed={spinSpeed} onSpinSpeed={setSpinSpeed} onSpinRate={onSpinRate} spinning={spinning} />
         <LocationLock locked={locked} onLock={setLocked} placeName={place.name} lat={place.lat} lon={place.lon} onPlace={changePlace} relocatedFrom={relocatedFrom} />
       </footer>

@@ -76,13 +76,15 @@ def lunar_return_instants(natal: Chart, year: int) -> list[float]:
     return [c.jd_ut for c in Track("moon", jd0, jd1, natal.settings).crossings(natal.planets["moon"].lon) if c.jd_ut < jd1]
 
 
-def dual_houses(lon: float, cusps: dict[int, float], orb: float) -> list[int]:
-    """The house a longitude is in, plus the neighbour when within `orb` of the cusp between them."""
+def dual_houses(lon: float, cusps: dict[int, float], orb: float, orb_before: float | None = None) -> list[int]:
+    """The house a longitude is in, plus the neighbour when near the cusp between them: within `orb_before`
+    of the next cusp (approaching it) or within `orb` past the house's own cusp."""
+    before = orb if orb_before is None else orb_before
     h = house_of(lon, cusps)
     out = [h]
     nxt = 1 if h == 12 else h + 1
     prv = 12 if h == 1 else h - 1
-    if (cusps[nxt] - lon) % 360 <= orb:
+    if (cusps[nxt] - lon) % 360 <= before:
         out.append(nxt)
     elif (lon - cusps[h]) % 360 <= orb:
         out.append(prv)
@@ -123,7 +125,7 @@ def _facts(natal: Chart, chart: Chart, rules: Rules) -> dict:
     natal_house_of = {"asc": house_of(chart.houses.asc, natal.houses.cusps), "mc": house_of(chart.houses.mc, natal.houses.cusps)}
     for p in PLANETS:
         natal_house_of[p] = house_of(chart.planets[p].lon, natal.houses.cusps)
-    houses_of = {p: dual_houses(chart.planets[p].lon, chart.houses.cusps, rules.cusp_orb_degrees) for p in PLANETS}
+    houses_of = {p: dual_houses(chart.planets[p].lon, chart.houses.cusps, rules.cusp_orb_degrees, rules.cusp_orb_before_degrees) for p in PLANETS}
     angles = {"asc": chart.houses.asc, "mc": chart.houses.mc, "dsc": chart.houses.dsc, "ic": chart.houses.ic}
     angular = []
     for p in PLANETS:

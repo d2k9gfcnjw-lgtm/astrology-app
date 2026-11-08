@@ -59,6 +59,9 @@ def test_dual_houses_within_cusp_orb():
     assert dual_houses(28.0, cusps, 2.5) == [1, 2]     # 2 deg before cusp 2
     assert dual_houses(31.0, cusps, 2.5) == [2, 1]     # 1 deg after cusp 2: works in both, primary first
     assert dual_houses(359.0, cusps, 2.5) == [12, 1]
+    assert dual_houses(27.2, cusps, 2.5, 3.0) == [1, 2]  # 2.8 deg before: inside the wider approaching orb (Katia)
+    assert dual_houses(27.2, cusps, 2.5) == [1]
+    assert dual_houses(32.8, cusps, 2.5, 3.0) == [2]     # 2.8 deg past the cusp: outside the 2.5 orb
 
 
 def test_stelliums_and_rule_flags():

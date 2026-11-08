@@ -41,7 +41,7 @@ class FinderOptions:
 
 def facts_at(natal: Chart, planets: dict, houses, rules) -> Facts:
     cusps = houses.cusps
-    ho = {p: dual_houses(planets[p].lon, cusps, rules.cusp_orb_degrees) for p in PLANETS}
+    ho = {p: dual_houses(planets[p].lon, cusps, rules.cusp_orb_degrees, rules.cusp_orb_before_degrees) for p in PLANETS}
     angles = {"asc": houses.asc, "mc": houses.mc, "dsc": houses.dsc, "ic": houses.ic}
     angular = []
     for p in PLANETS:

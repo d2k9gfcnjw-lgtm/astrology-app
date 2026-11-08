@@ -13,6 +13,7 @@ RULES_PATH = Path(__file__).resolve().parents[3] / "rules" / "rules.yaml"
 @dataclass(frozen=True)
 class Rules:
     cusp_orb_degrees: float
+    cusp_orb_before_degrees: float
     angular_orb_degrees: float
     sr_asc_hard_filter_houses: list[int]
     mars_saturn_allowed_houses: list[int]
@@ -40,6 +41,7 @@ def load_rules(path: Path | str = RULES_PATH) -> Rules:
     asc = _filter(raw, "sr_asc_in_natal_1_6_12")
     return Rules(
         cusp_orb_degrees=float(raw.get("cusp_orb_degrees", 2.5)),
+        cusp_orb_before_degrees=float(raw.get("cusp_orb_before_degrees", raw.get("cusp_orb_degrees", 2.5))),
         angular_orb_degrees=float(raw.get("angular_orb_degrees", 12)),
         sr_asc_hard_filter_houses=list(asc.get("houses", [1, 6, 12])),
         mars_saturn_allowed_houses=list(ms.get("allowed_houses", [3, 9])),

@@ -10,6 +10,9 @@ house_system: placidus
 
 cusp_orb_degrees: 2.5        # TR/owner 27 Oct 2026 and SRG 23: a planet within 2.5 deg of a cusp works in BOTH
                              # houses; for penalties and hard filters the worse house counts, bonuses use the primary.
+cusp_orb_before_degrees: 3.0 # a planet approaching a cusp (at the end of a house) already works in the next house within 3 deg.
+                             # Calibrated 8 Nov 2026 on Katia's 2027 verdicts: Neptune 2.9 deg before the 6th cusp made Vancouver and
+                             # Whistler "not okay", Chilliwack (3.9 deg) was fine, Seattle fell on Mercury 2.45 deg past the DSC. Confirm.
 angular_orb_degrees: 12      # owner 27 Oct 2026: a planet within 12 deg of an SR angle is dominant.
 bonus_full_orb_degrees: 5    # bonuses are full inside 5 deg of the angle (SRG 24 reasons with 5 deg) ... (confirm)
 bonus_half_orb_degrees: 12   # ... and fall to half at 12 deg (confirm)

@@ -30,3 +30,12 @@ cd backend && uv run uvicorn app.main:app --reload   # API on http://127.0.0.1:8
 
 See `golden/README.md`. Strings are `"Sign deg min sec"` for longitudes, signed `"deg min sec"`
 per day for speeds, and `"deg min sec N|S"` for latitudes and declinations.
+
+## Phase 5: the finder
+
+- `app/engine/finder/scoring.py`: the rule engine; every point from `rules/rules.yaml` with its sentence and page.
+- `app/engine/finder/context.py`: the year's transit themes (slow planets, the book's orbs and aspects).
+- `app/engine/finder/geo.py`: Natural Earth land mask, airports with scheduled service, candidate cities.
+- `app/engine/finder/search.py`: SR instant, 1° grid with 0.25° refinement, city scoring, birth-time robustness, tiers, versus home.
+- `POST /api/finder/run`, `GET /api/finder/land`. A world run takes about 15 seconds.
+- Calibration: `reference/case-studies/2027-expected.yaml` (local) drives `tests/test_finder_search.py::test_katias_nine_places_2027`.

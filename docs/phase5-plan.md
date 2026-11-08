@@ -1,6 +1,6 @@
 # Phase 5 plan: the aimed solar return finder
 
-Status: waiting for owner approval. Rules and answers: `rules/rules.yaml` (v2), `docs/phase5-answers.md`.
+Status: approved and built 8 Nov 2026 (rules v2.1, calibrated on the 2027 case). Rules and answers: `rules/rules.yaml`, `docs/phase5-answers.md`.
 
 ## The approach in one paragraph
 

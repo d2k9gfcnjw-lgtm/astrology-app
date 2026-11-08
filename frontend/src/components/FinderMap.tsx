@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
@@ -56,6 +56,7 @@ interface Props {
 export function FinderMap({ result, selected, onSelectCity, onClickPlace, landGeoJson }: Props) {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
+  const [ready, setReady] = useState(false)
   const markers = useRef<maplibregl.Marker[]>([])
 
   useEffect(() => {
@@ -75,9 +76,18 @@ export function FinderMap({ result, selected, onSelectCity, onClickPlace, landGe
       center: [0, 20], zoom: 1.2, attributionControl: {},
     })
     m.addControl(new maplibregl.NavigationControl(), 'top-right')
+    // 'load' can be missed or never fire while raster tiles are pending: also watch styledata and poll briefly.
+    m.on('load', () => setReady(true))
+    m.on('styledata', () => { if (m.isStyleLoaded()) setReady(true) })
+    const poll = window.setInterval(() => { if (m.isStyleLoaded() || m.loaded()) { setReady(true); window.clearInterval(poll) } }, 250)
+    window.setTimeout(() => window.clearInterval(poll), 15000)
+    // The container can be sized after the map is created (hidden tab, phone layout): keep the canvas in step.
+    const ro = new ResizeObserver(() => m.resize())
+    ro.observe(el.current)
+    window.setTimeout(() => m.resize(), 300)
     m.on('click', (e: maplibregl.MapMouseEvent) => onClickPlace(e.lngLat.lat, e.lngLat.lng))
     map.current = m
-    return () => { m.remove(); map.current = null }
+    return () => { window.clearInterval(poll); ro.disconnect(); m.remove(); map.current = null }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Natural Earth land: works offline when tiles do not load.
@@ -90,9 +100,8 @@ export function FinderMap({ result, selected, onSelectCity, onClickPlace, landGe
       m.addLayer({ id: 'land-fill', type: 'fill', source: 'land', paint: { 'fill-color': '#f1efe8', 'fill-opacity': 0.9 } }, 'osm')
       m.addLayer({ id: 'land-line', type: 'line', source: 'land', paint: { 'line-color': '#777', 'line-width': 0.6 } })
     }
-    if (m.isStyleLoaded()) add()
-    else m.once('load', add)
-  }, [landGeoJson])
+    if (ready) add()
+  }, [landGeoJson, ready])
 
   useEffect(() => {
     const m = map.current
@@ -127,9 +136,8 @@ export function FinderMap({ result, selected, onSelectCity, onClickPlace, landGe
         markers.current.push(new maplibregl.Marker({ element: d }).setLngLat([c.lon, c.lat]).addTo(m))
       }
     }
-    if (m.isStyleLoaded()) apply()
-    else m.once('load', apply)
-  }, [result, selected, onSelectCity])
+    if (ready) apply()
+  }, [result, selected, onSelectCity, ready])
 
   return <div ref={el} className="finder-map" />
 }

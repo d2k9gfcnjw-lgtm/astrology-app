@@ -36,6 +36,7 @@ export function AcgView(p: Props) {
   const [err, setErr] = useState<string | null>(null)
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
+  const [ready, setReady] = useState(false)
   const marker = useRef<maplibregl.Marker | null>(null)
 
   // Which instant the lines belong to
@@ -73,8 +74,17 @@ export function AcgView(p: Props) {
       center: [0, 20], zoom: 1.2, attributionControl: {},
     })
     m.addControl(new maplibregl.NavigationControl(), 'top-right')
+    // 'load' can be missed or never fire while raster tiles are pending: also watch styledata and poll briefly.
+    m.on('load', () => setReady(true))
+    m.on('styledata', () => { if (m.isStyleLoaded()) setReady(true) })
+    const poll = window.setInterval(() => { if (m.isStyleLoaded() || m.loaded()) { setReady(true); window.clearInterval(poll) } }, 250)
+    window.setTimeout(() => window.clearInterval(poll), 15000)
+    // The container can be sized after the map is created (hidden tab, phone layout): keep the canvas in step.
+    const ro = new ResizeObserver(() => m.resize())
+    ro.observe(el.current)
+    window.setTimeout(() => m.resize(), 300)
     map.current = m
-    return () => { m.remove(); map.current = null }
+    return () => { window.clearInterval(poll); ro.disconnect(); m.remove(); map.current = null }
   }, [])
 
   useEffect(() => {
@@ -94,8 +104,8 @@ export function AcgView(p: Props) {
       m.addLayer({ id: 'land-fill', type: 'fill', source: 'land', paint: { 'fill-color': '#f1efe8', 'fill-opacity': 0.9 } }, 'osm')
       m.addLayer({ id: 'land-line', type: 'line', source: 'land', paint: { 'line-color': '#777', 'line-width': 0.6 } })
     }
-    if (m.isStyleLoaded()) add(); else m.once('load', add)
-  }, [p.landGeoJson])
+    if (ready) add()
+  }, [p.landGeoJson, ready])
 
   // lines, orb bands, parans
   useEffect(() => {
@@ -118,8 +128,8 @@ export function AcgView(p: Props) {
         m.addLayer({ id: 'acg-parans', type: 'line', source: 'parans', paint: { 'line-color': '#555', 'line-width': 0.6, 'line-dasharray': [1, 4], 'line-opacity': 0.35 } }, 'acg-orb')
       }
     }
-    if (m.isStyleLoaded()) apply(); else m.once('load', apply)
-  }, [data, acg.orb_km, acg.include_parans])
+    if (ready) apply()
+  }, [data, acg.orb_km, acg.include_parans, ready])
 
   // optional finder heat underneath (separate method, separate layer)
   useEffect(() => {
@@ -149,8 +159,8 @@ export function AcgView(p: Props) {
       m.addSource('heat', { type: 'image', url: canvas.toDataURL(), coordinates: [[-180 - step / 2, latMax + step / 2], [180 - step / 2, latMax + step / 2], [180 - step / 2, latMin - step / 2], [-180 - step / 2, latMin - step / 2]] })
       m.addLayer({ id: 'heat', type: 'raster', source: 'heat', paint: { 'raster-opacity': 0.6, 'raster-resampling': 'nearest' } }, m.getLayer('acg-orb') ? 'acg-orb' : undefined)
     }
-    if (m.isStyleLoaded()) apply(); else m.once('load', apply)
-  }, [showHeat, p.finderResult, data])
+    if (ready) apply()
+  }, [showHeat, p.finderResult, data, ready])
 
   const toggle = (list: string[], k: string) => (list.includes(k) ? list.filter((x) => x !== k) : [...list, k])
   const pick = (c: City) => { void clickPlace(c.lat, c.lon, c.label); map.current?.flyTo({ center: [c.lon, c.lat], zoom: 4 }) }

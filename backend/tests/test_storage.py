@@ -87,3 +87,13 @@ def test_delete_is_soft_and_restorable(lib, tmp_path):
 def test_get_missing_raises(lib):
     with pytest.raises(KeyError):
         lib.get("nope")
+
+
+def test_owner_links_and_home_resolution(lib):
+    person = lib.create(_subject(name="Owner", kind="person", home_place_name="Chicago", home_lat=41.85, home_lon=-87.65))
+    ret = lib.create(_subject(name="Return", kind="event", owner_id=person.id))
+    assert lib.get(ret.id).owner_id == person.id
+    assert lib.owner_of(ret).id == person.id
+    assert lib.owner_of(person).id == person.id
+    orphan = lib.create(_subject(name="Orphan", kind="event"))
+    assert lib.owner_of(orphan) is None

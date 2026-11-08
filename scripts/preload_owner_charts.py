@@ -54,12 +54,25 @@ def main() -> int:
             items.append(SubjectIn(name=f"ASR {q['year']} {q['name']} ({q.get('status', 'planned')})", kind="event", tags=["solar-return"] + list(q.get("tags", [])),
                                    notes=f"Computed by the app: {sr.utc_datetime} UT at {q.get('place', q['name'])}.", datetime_local=local,
                                    time_confidence="exact", place_name=q.get("place", q["name"]), lat=float(q["lat"]), lon=float(q["lon"]), timezone=sr.timezone))
-    for s in items:
-        if s.name in existing:
+    # the first item is the person; everything else belongs to them
+    person_name = items[0].name
+    person = next((x for x in lib.list(include_deleted=True) if x.name == person_name), None)
+    if person is None:
+        person = lib.create(items[0])
+        print(f"  added   {person.name}")
+    else:
+        print(f"  have    {person.name}")
+    for s in items[1:]:
+        s = s.model_copy(update={"owner_id": person.id})
+        found = next((x for x in lib.list(include_deleted=True) if x.name == s.name), None)
+        if found is None:
+            lib.create(s)
+            print(f"  added   {s.name}")
+        elif found.owner_id != person.id:
+            lib.update(found.id, SubjectIn(**{**found.model_dump(exclude={"id", "created_at", "updated_at", "deleted_at"}), "owner_id": person.id}))
+            print(f"  linked  {s.name} -> {person.name}")
+        else:
             print(f"  have    {s.name}")
-            continue
-        lib.create(s)
-        print(f"  added   {s.name}")
     print(f"Library: {lib.db_path}")
     return 0
 

@@ -193,6 +193,7 @@ export interface SubjectIn {
   home_lat: number | null
   home_lon: number | null
   home_timezone: string | null
+  owner_id: string | null
   settings: Partial<Settings>
 }
 

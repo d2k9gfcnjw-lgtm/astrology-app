@@ -25,7 +25,7 @@ Kind = Literal["person", "event", "place", "question"]
 TimeConfidence = Literal["exact", "within_5_min", "within_30_min", "unknown"]
 
 SECRET_FIELDS = ("name", "notes", "datetime_local", "place_name", "lat", "lon", "timezone", "utc_offset_override",
-                 "home_place_name", "home_lat", "home_lon", "home_timezone")
+                 "home_place_name", "home_lat", "home_lon", "home_timezone", "owner_id")
 
 
 class SubjectIn(BaseModel):
@@ -45,6 +45,7 @@ class SubjectIn(BaseModel):
     home_lat: float | None = Field(default=None, ge=-90, le=90)
     home_lon: float | None = Field(default=None, ge=-180, le=180)
     home_timezone: str | None = None
+    owner_id: str | None = None        # the person this chart belongs to (returns, events); a person owns itself
     settings: dict = Field(default_factory=dict)
 
 
@@ -171,3 +172,15 @@ class ChartLibrary:
         for r in self._conn.execute("SELECT tags FROM subjects WHERE deleted_at IS NULL"):
             seen.update(json.loads(r["tags"]))
         return sorted(seen)
+
+
+    def owner_of(self, s: Subject) -> Subject | None:
+        """The person a chart belongs to: itself for a person, else its owner, if any."""
+        if s.kind == "person":
+            return s
+        if s.owner_id:
+            try:
+                return self.get(s.owner_id)
+            except KeyError:
+                return None
+        return None

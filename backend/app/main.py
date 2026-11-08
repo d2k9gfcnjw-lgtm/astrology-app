@@ -336,8 +336,12 @@ def _natal_for(s: Subject) -> tuple[Chart, Settings]:
 
 
 def _home_of(s: Subject) -> tuple[float, float, str]:
+    """Where the person lives: the chart's own home, else its owner's home, else the birth place."""
     if s.home_lat is not None and s.home_lon is not None:
         return s.home_lat, s.home_lon, s.home_place_name
+    owner = library().owner_of(s)
+    if owner is not None and owner.id != s.id and owner.home_lat is not None and owner.home_lon is not None:
+        return owner.home_lat, owner.home_lon, owner.home_place_name
     return s.lat, s.lon, s.place_name
 
 

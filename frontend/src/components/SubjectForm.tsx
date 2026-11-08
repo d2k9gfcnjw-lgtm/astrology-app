@@ -6,18 +6,20 @@ import { CitySearch } from './CitySearch'
 const EMPTY: SubjectIn = {
   name: '', kind: 'person', tags: [], notes: '', datetime_local: '', time_confidence: 'exact', place_name: '',
   lat: 0, lon: 0, timezone: null, utc_offset_override: null,
-  home_place_name: '', home_lat: null, home_lon: null, home_timezone: null, settings: {},
+  home_place_name: '', home_lat: null, home_lon: null, home_timezone: null, owner_id: null, settings: {},
 }
 
 interface Props {
   initial?: Subject | null
+  owner?: Subject | null
+  people?: Subject[]
   onSaved: (s: Subject) => void
   onPreview: (s: SubjectIn) => void
   onCancel: () => void
 }
 
-export function SubjectForm({ initial, onSaved, onPreview, onCancel }: Props) {
-  const [f, setF] = useState<SubjectIn>(initial ? { ...initial } : EMPTY)
+export function SubjectForm({ initial, owner, people = [], onSaved, onPreview, onCancel }: Props) {
+  const [f, setF] = useState<SubjectIn>(initial ? { ...initial } : { ...EMPTY, kind: owner ? 'event' : 'person', owner_id: owner?.id ?? null })
   const [date, setDate] = useState(initial ? initial.datetime_local.slice(0, 10) : '')
   const [time, setTime] = useState(initial ? initial.datetime_local.slice(11, 19) : '')
   const [tags, setTags] = useState(initial ? initial.tags.join(', ') : '')
@@ -50,7 +52,7 @@ export function SubjectForm({ initial, onSaved, onPreview, onCancel }: Props) {
 
   return (
     <form className="subject-form" onSubmit={(e) => { e.preventDefault(); void save() }}>
-      <h2>{initial ? 'Edit chart' : 'New chart'}</h2>
+      <h2>{initial ? (initial.kind === 'person' ? 'Edit person' : 'Edit chart') : owner ? `New chart for ${owner.name}` : 'New person'}</h2>
       <label>Name<input value={f.name} onChange={(e) => set({ name: e.target.value })} autoFocus /></label>
       <div className="row">
         <label>Kind
@@ -85,9 +87,23 @@ export function SubjectForm({ initial, onSaved, onPreview, onCancel }: Props) {
           {resolved.flags.map((fl) => <div key={fl} className="flag">⚠ {resolved.flag_text[fl]}</div>)}
         </div>
       )}
-      <label>Lives in <small>(default place for lunar returns and the base solar return)</small>
-        <CitySearch value={f.home_place_name} onPick={(c) => set({ home_place_name: c.label, home_lat: c.lat, home_lon: c.lon, home_timezone: c.timezone })} placeholder="City where the person lives now" />
-      </label>
+      {f.kind !== 'person' && people.length > 0 && (
+        <label>Belongs to
+          <select value={f.owner_id ?? ''} onChange={(e) => set({ owner_id: e.target.value || null })}>
+            <option value="">nobody (other charts)</option>
+            {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </label>
+      )}
+      {f.kind === 'person' && (
+        <fieldset className="home-box">
+          <legend>Home: where they live now</legend>
+          <div className="hint">Used for lunar returns, the base solar return, the finder's "versus home" and Now sky.</div>
+          <CitySearch value={f.home_place_name} onPick={(c) => set({ home_place_name: c.label, home_lat: c.lat, home_lon: c.lon, home_timezone: c.timezone })} placeholder="City where the person lives now" />
+          {f.home_lat !== null && f.home_lon !== null ? <div className="hint">{f.home_place_name} · {f.home_lat.toFixed(2)}, {f.home_lon.toFixed(2)} · {f.home_timezone}</div> : <div className="flag">Not set: the birth place is used until you set it.</div>}
+          {f.home_lat !== null && <button type="button" className="secondary" onClick={() => set({ home_place_name: '', home_lat: null, home_lon: null, home_timezone: null })}>Clear home</button>}
+        </fieldset>
+      )}
       <label>Tags<input value={tags} placeholder="comma separated" onChange={(e) => setTags(e.target.value)} /></label>
       <label>Notes<textarea value={f.notes} rows={2} onChange={(e) => set({ notes: e.target.value })} /></label>
       {err && <div className="error">{err}</div>}

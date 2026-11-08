@@ -61,3 +61,14 @@ def test_unsaved_solar_return():
                                                 "year": 2025, "lat": 59.9167, "lon": 10.75, "settings": {}})
     assert r.status_code == 200, r.text
     assert r.json()["chosen"]["year"] == 2025 and r.json()["base"]["place"]["lat"] == 41.85
+
+
+def test_return_uses_owners_home(tmp_path, monkeypatch):
+    _lib(tmp_path, monkeypatch)
+    person = client.post("/api/subjects", json={"name": "Golden Oslo", "datetime_local": "1992-07-23T04:23:00", "lat": 59.9167, "lon": 10.75,
+                                                "timezone": "Europe/Oslo", "home_lat": 41.85, "home_lon": -87.65, "home_place_name": "Chicago"}).json()
+    ev = client.post("/api/subjects", json={"name": "SR 2026", "kind": "event", "datetime_local": "2026-07-23T09:27:00", "lat": 59.9167, "lon": 10.75,
+                                            "timezone": "Europe/Oslo", "owner_id": person["id"]}).json()
+    r = client.get(f"/api/subjects/{ev['id']}/solar-return", params={"year": 2026})
+    assert r.status_code == 200, r.text
+    assert r.json()["base"]["place"]["lat"] == 41.85 and r.json()["base"]["place"]["name"] == "Chicago"

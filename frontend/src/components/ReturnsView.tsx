@@ -82,7 +82,7 @@ export function ReturnsView(p: Props) {
       name, kind: 'event', tags: [kind === 'solar' ? 'solar-return' : 'lunar-return'], notes: '',
       datetime_local: shown.local_datetime.slice(0, 16) + ':00', time_confidence: 'exact', place_name: shown.place.name,
       lat: shown.place.lat, lon: shown.place.lon, timezone: shown.timezone, utc_offset_override: null,
-      home_place_name: '', home_lat: null, home_lon: null, home_timezone: null, settings: {},
+      home_place_name: '', home_lat: null, home_lon: null, home_timezone: null, owner_id: p.subject ? (p.subject.kind === 'person' ? p.subject.id : p.subject.owner_id) : null, settings: {},
     }
     try { p.onSaved(await api.createSubject(s)) } catch (e) { setErr((e as Error).message) }
   }, [shown, kind, p])

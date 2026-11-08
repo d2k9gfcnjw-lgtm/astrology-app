@@ -44,7 +44,10 @@ export default function App() {
   const [solveMenu, setSolveMenu] = useState<{ body: string; lon: number; hits: SolveHit[]; chosen: number } | null>(null)
   const [panel, setPanel] = useState<Panel>('library')
   const [editing, setEditing] = useState<Subject | null>(null)
+  const [newOwner, setNewOwner] = useState<Subject | null>(null)
+  const [people, setPeople] = useState<Subject[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
+  useEffect(() => { api.subjects().then((xs) => setPeople(xs.filter((x) => x.kind === 'person'))).catch(() => undefined) }, [refreshKey])
   const [highlight, setHighlight] = useState<string | null>(null)
   const [spinSpeed, setSpinSpeed] = useState(3600)
   const [spinning, setSpinning] = useState(false)
@@ -214,8 +217,8 @@ export default function App() {
         </div>
       </header>
       <div className="sidebar">
-        {panel === 'library' && <Library selectedId={subject?.id ?? null} refreshKey={refreshKey} onOpen={openSubject} onEdit={(s) => { setEditing(s); setPanel('form') }} onNew={() => { setEditing(null); setPanel('form') }} />}
-        {panel === 'form' && <SubjectForm initial={editing} onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} onPreview={preview} onCancel={() => setPanel('library')} />}
+        {panel === 'library' && <Library selectedId={subject?.id ?? null} refreshKey={refreshKey} onOpen={openSubject} onEdit={(s) => { setEditing(s); setNewOwner(null); setPanel('form') }} onNew={(owner) => { setEditing(null); setNewOwner(owner ?? null); setPanel('form') }} />}
+        {panel === 'form' && <SubjectForm initial={editing} owner={newOwner} people={people} onSaved={(s) => { setRefreshKey((k) => k + 1); void openSubject(s) }} onPreview={preview} onCancel={() => setPanel('library')} />}
         {panel === 'settings' && <SettingsDrawer settings={settings} onChange={setSettings} onClose={() => setPanel('library')} />}
       </div>
       <main>
